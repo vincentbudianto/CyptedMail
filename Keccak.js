@@ -60,11 +60,14 @@ module.exports = {
         let i=0
         while (i < PP.length) {
             let droplet = PP[i]
+            let j = 0
             while (droplet.length < Fwidth) {
-                droplet.push(0)
+                droplet.push(droplet[j % droplet.length])
+                j++
             }
             S = utils.XORArrays(droplet, S)
             S = utils.permutate(S)
+            // console.log("S: ", i, " = ", S);
             i++
         }
         return S
@@ -96,20 +99,20 @@ module.exports = {
         // Converts plaintext to array of ascii codes, then Pad&Break
         let P = string.toASCII(plaintext)
         P = this.padArray(P)
-        console.log(P);
+        // console.log(P);
         let PP = this.breakArray(P)
 
         // Initiate an array of Fwidth zeros
         let S = Array(Fwidth)
         S.fill(0)
 
-        console.log("Begin Absorption");
+        // console.log("Begin Absorption");
         S = this.absorb(PP, S)
 
-        console.log("Begin Squeezing");
+        // console.log("Begin Squeezing");
         let Z = this.squeeze(S, outputSize)
         Z = Z.splice(0, outputSize)
-        console.log(Z);
+        // console.log(Z);
 
         return(this.hashAlphaNumeric(Z))
     }
