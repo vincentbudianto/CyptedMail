@@ -3,11 +3,16 @@ let utils = require('./util/utils')
 
 module.exports = {
     EllipticCurve: class{
-        constructor(a, b, p) {
-            this.a = a
-            this.b = b
-            this.p = p
-            this.generatePoints()
+        constructor(a, b, p, g) {
+            this.a = BigInt(a)
+            this.b = BigInt(b)
+            this.p = BigInt(p)
+            if (g === undefined) {
+                this.generatePoints()
+            } else {
+                this.base = g
+            }
+            
         }
 
         validateGraph() {
@@ -26,11 +31,12 @@ module.exports = {
 
             let points = []
             
-            for(let i = 0; i < this.p; i++) {
-                let y_2 = string.mod((Math.pow(i, 3) + i * this.a + this.b), this.p)
-                for(let j = 0; j < this.p; j++) {
-                    if (string.mod(Math.pow(j, 2), this.p) === y_2) {
+            for(let i = 0n; i < this.p; i++) {
+                let y_2 = utils.mod((i ** 3n + i * this.a + this.b), this.p)
+                for(let j = 0n; j < this.p; j++) {
+                    if (utils.mod(j ** 2n, this.p) === y_2) {
                         points.push([i, j])
+                        // console.log(points)
                     }
                 }
             }
@@ -49,14 +55,13 @@ module.exports = {
 
             let numerator = p[1] - q[1]
             let denominator = p[0] - q[0]
-
             if (denominator < 0) {
-                numerator *= -1
-                denominator *= -1
+                numerator *= -1n
+                denominator *= -1n
             }
 
-            let modInverse = string.modInverse(denominator, this.p)
-            let m = string.mod((numerator * modInverse), this.p)
+            let modInverse = utils.modInverse(denominator, this.p)
+            let m = utils.mod((numerator * modInverse), this.p)
             
             return m
         }
@@ -70,16 +75,16 @@ module.exports = {
                 return NaN
             }
 
-            let numerator = 3 * Math.pow(p[0], 2) + this.a
-            let denominator = 2 * p[1]
+            let numerator = 3n * (p[0] ** 2n) + this.a
+            let denominator = 2n * p[1]
 
             if (denominator < 0) {
-                numerator *= -1
-                denominator *= -1
+                numerator *= -1n
+                denominator *= -1n
             }
 
-            let modInverse = string.modInverse(denominator, this.p)
-            let m = string.mod((numerator * modInverse), this.p)
+            let modInverse = utils.modInverse(denominator, this.p)
+            let m = utils.mod((numerator * modInverse), this.p)
             
             return m
         }
@@ -90,37 +95,23 @@ module.exports = {
          * @param {Array} q 
          */
         sumGraphPoint(p, q) {
+            // console.log('P', p, '; Q', q)
             if (p[0] === q[0] && p[1] === q[1]) {
                 return this.doubleGraphPoint(p)
             }
-            if (p[0] === -1 && p[1] === -1) {
+            if (p[0] === -1n && p[1] === -1n) {
                 return q
             }
-            if (q[0] === -1 && q[1] === -1) {
+            if (q[0] === -1n && q[1] === -1n) {
                 return p
             }
             if (p[0] === q[0]) {
-                return [-1, -1]
+                return [-1n, -1n]
             }
             let m = this.countGradient(p, q)
-            let xr = string.mod((Math.pow(m, 2) - p[0] - q[0]), this.p)
-            let yr = string.mod((m * (p[0] - xr) - p[1]), this.p)
-            return [xr, yr]
-        }
-
-        /**
-         * 
-         * @param {Array} p 
-         * @param {Array} q 
-         */
-        minusGraphPoint(p, q) {
-            let tempQ = [q[0], string.mod((-q[1]), this.p)]
-            let m = this.countGradient(p, tempQ)
-            if (m === NaN) {
-                return [-1, -1]
-            }
-            let xr = string.mod((Math.pow(m, 2) - p[0] - tempQ[0]), this.p)
-            let yr = string.mod((m * (p[0] - xr) - p[1]), this.p)
+            let xr = utils.mod((m ** 2n - p[0] - q[0]), this.p)
+            let yr = utils.mod((m * (p[0] - xr) - p[1]), this.p)
+            // console.log(m, [xr, yr])
             return [xr, yr]
         }
 
@@ -131,10 +122,10 @@ module.exports = {
         doubleGraphPoint(p) {
             let m = this.countGradientDouble(p)
             if (m === NaN) {
-                return [-1, -1]
+                return [-1n, -1n]
             }
-            let xr = string.mod((Math.pow(m, 2) - 2 * p[0]), this.p)
-            let yr = string.mod((m * (p[0] - xr) - p[1]), this.p)
+            let xr = utils.mod(((m ** 2n) - 2n * p[0]), this.p)
+            let yr = utils.mod((m * (p[0] - xr) - p[1]), this.p)
             return [xr, yr]
         }
         
@@ -144,20 +135,24 @@ module.exports = {
          * @param {Number} k 
          */
         multiplyGraphPoint(p, k) {
-            if (k < 1) {
-                return [-1, -1]
+            // console.log('IN', p, k)
+            if (k < 1n) {
+                return [-1n, -1n]
             }
-            if (k === 1) {
+            if (k === 1n) {
                 return p;
             }
             let result = this.doubleGraphPoint(p)
-            // console.log(1, result)
-            for (let i = 2; i <= k; i++) {
+            for (let i = 3; i <= k; i++) {
                 result = this.sumGraphPoint(result, p)
-                // console.log(i, result)
+                if (i % 10000000 === 0) {
+                    // console.log(i)
+                }
             }
             return result
         }
+
+        
         
         /**
          * 
@@ -173,7 +168,8 @@ module.exports = {
          * @param {Number} num 
          */
         setBasePointNumber(num) {
-            if (num >= this.points.length || num <= 0) {
+            // console.log(this.points)
+            if (num >= this.points || num <= 0) {
                 this.base = this.points[0] 
             } else {
                 this.base = this.points[num]
@@ -181,16 +177,25 @@ module.exports = {
             this.setOrder()
         }
         
+        /**
+         * ONLY FOR LOW INTEGER BASE POINT (TOO LONG)
+         */
         setOrder() {
             let curPoint = this.base
-            let i = 0
-            while (curPoint[0] !== -1 && curPoint[1] !== -1) {
+            let i = 1n
+
+            while (curPoint[0] !== -1n && curPoint[1] !== -1n) {
                 curPoint = this.sumGraphPoint(curPoint, this.base)
+                // console.log(i, curPoint)
                 i++
             }
             this.n = i
-            let nBinary = utils.dec2bin(this.n)
-            this.binSize = nBinary.length
+            this.binSize = utils.dec2binCount(this.n)
+        }
+
+        setOrderExplicit(n) {
+            this.n = n
+            this.binSize = utils.dec2binCount(this.n)
         }
     }
 }
