@@ -51,3 +51,6 @@ console.log('Verified =', verified)
 
 let verifiedFalse = ecdsa_code.verify("Pamu, aku, dan kita semua akan bergabung menjadi satu", signature, ecdsa_code.publicKey, ecdsa_code.privateKey)
 console.log('Verified =', verifiedFalse)
+
+verifiedFalse = ecdsa_code.verify("Kamu, aku, dan kita semua akan bergabung menjadi dua", signature, ecdsa_code.publicKey, ecdsa_code.privateKey)
+console.log('Verified =', verifiedFalse)
