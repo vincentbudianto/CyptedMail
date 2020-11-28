@@ -1,0 +1,24 @@
+{
+  "name": "cyptedmail",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "biguint-format": "^1.0.2",
+    "loader.js": "^4.7.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vincentbudianto/CyptedMail.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vincentbudianto/CyptedMail/issues"
+  },
+  "homepage": "https://github.com/vincentbudianto/CyptedMail#readme"
+}
