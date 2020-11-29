@@ -5,6 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "biguint-format": "^1.0.2",
+    "googleapis": "^39.2.0",
     "loader.js": "^4.7.0",
     "python-shell": "^2.0.3"
   },
