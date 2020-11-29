@@ -25,7 +25,7 @@ let utils = require('./util/utils')
 // let b = BigInt(0x64210519e59c80e70fa7e9ab72243049feb8deecc146b9b1)
 // let g = [BigInt(0x188da80eb03090f67cbf20eb43a18800f4ff0afd82ff1012),
 //         BigInt(0x07192b95ffc8da78631011ed6b24cdd573f977a11e794811)]
-// let ecdsa_code = new ecdsa.ECDSA()
+// let ecdsa_code = new ecdsa.ECDSA(a, b, p, g, n)
 
 
 /*               CONFIG 3                */
@@ -33,24 +33,30 @@ let a = BigInt(1)
 let b = BigInt(6)
 let p = BigInt(811)
 let g = [BigInt(0), BigInt(156)]
+let n = BigInt(829)
 let ecdsa_code = new ecdsa.ECDSA(a, b, p, 0)
 
 
-console.log('Base =', ecdsa_code.curve.base, '; a =', ecdsa_code.curve.a, '; b =', ecdsa_code.curve.b)
-console.log('n =', ecdsa_code.curve.n, '; binSize =', ecdsa_code.curve.binSize)
-ecdsa_code.setPrivateKeyRandom()
+/*              VALIDATE PARAMETER                 */
+console.log(ecdsa_code.curve.multiplyGraphPoint(ecdsa_code.curve.base, n))
 
-console.log('Private key =', ecdsa_code.privateKey)
-console.log('Public key =', ecdsa_code.publicKey)
 
-let signature = ecdsa_code.sign("Kamu, aku, dan kita semua akan bergabung menjadi satu", ecdsa_code.privateKey)
-console.log('Signature =', signature)
+/*              RUN                  */
+// console.log('Base =', ecdsa_code.curve.base, '; a =', ecdsa_code.curve.a, '; b =', ecdsa_code.curve.b)
+// console.log('n =', ecdsa_code.curve.n, '; binSize =', ecdsa_code.curve.binSize)
+// ecdsa_code.setPrivateKeyRandom()
 
-let verified = ecdsa_code.verify("Kamu, aku, dan kita semua akan bergabung menjadi satu", signature, ecdsa_code.publicKey, ecdsa_code.privateKey)
-console.log('Verified =', verified)
+// console.log('Private key =', ecdsa_code.privateKey)
+// console.log('Public key =', ecdsa_code.publicKey)
 
-let verifiedFalse = ecdsa_code.verify("Pamu, aku, dan kita semua akan bergabung menjadi satu", signature, ecdsa_code.publicKey, ecdsa_code.privateKey)
-console.log('Verified =', verifiedFalse)
+// let signature = ecdsa_code.sign("Kamu, aku, dan kita semua akan bergabung menjadi satu", ecdsa_code.privateKey)
+// console.log('Signature =', signature)
 
-verifiedFalse = ecdsa_code.verify("Kamu, aku, dan kita semua akan bergabung menjadi dua", signature, ecdsa_code.publicKey, ecdsa_code.privateKey)
-console.log('Verified =', verifiedFalse)
+// let verified = ecdsa_code.verify("Kamu, aku, dan kita semua akan bergabung menjadi satu", signature, ecdsa_code.publicKey, ecdsa_code.privateKey)
+// console.log('Verified =', verified)
+
+// let verifiedFalse = ecdsa_code.verify("Pamu, aku, dan kita semua akan bergabung menjadi satu", signature, ecdsa_code.publicKey, ecdsa_code.privateKey)
+// console.log('Verified =', verifiedFalse)
+
+// verifiedFalse = ecdsa_code.verify("Kamu, aku, dan kita semua akan bergabung menjadi dua", signature, ecdsa_code.publicKey, ecdsa_code.privateKey)
+// console.log('Verified =', verifiedFalse)
