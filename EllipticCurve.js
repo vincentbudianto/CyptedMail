@@ -134,7 +134,7 @@ module.exports = {
          * @param {Array} p 
          * @param {Number} k 
          */
-        multiplyGraphPoint(p, k) {
+        multiplyGraphPointOld(p, k) {
             // console.log('IN', p, k)
             if (k < 1n) {
                 return [-1n, -1n]
@@ -152,7 +152,26 @@ module.exports = {
             return result
         }
 
-        
+        /**
+         * 
+         * @param {Array} p 
+         * @param {Number} k 
+         */
+        multiplyGraphPoint(p, k) {
+            // console.log('IN', p, k)
+            if (k < 1n) {
+                return [-1n, -1n]
+            }
+            else if (k === 1n) {
+                return p;
+            }
+            else if ((k % 2n) === 1n) {
+                return this.sumGraphPoint(p, this.multiplyGraphPoint(p, k - 1n))
+            }
+            else {
+                return this.multiplyGraphPoint(this.doubleGraphPoint(p), k / 2n)
+            }
+        }
         
         /**
          * 
