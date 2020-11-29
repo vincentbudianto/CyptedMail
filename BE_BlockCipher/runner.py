@@ -1,4 +1,5 @@
 import time
+import sys
 from blockCipher import BlockCipher
 from helper import Helper
 
@@ -21,21 +22,33 @@ def decrypt_string(text, key):
     return result
 
 if __name__ == "__main__":
-    input_name = "Aku ingin makan nasi uduk karena nasi uduk itu enak waw."
+    mode = sys.argv[1]
+    text = sys.argv[2]
+    key = sys.argv[3]
+
+    if (mode == 'encrypt'):
+        print(encrypt_string(text, key))
+    else:
+        print(decrypt_string(text, key))
+    
+
+    # input_name = "Aku ingin makan nasi uduk karena nasi uduk itu enak waw."
+    # key = "asd123pl"
+
+    # encrypted = encrypt_string(input_name, key)
+    # print('ENCRYPTED: ')
+    # print(encrypted)
+    # print('\n')
+    # decrypted = decrypt_string(encrypted, key)
+    # print('DECRYPTED: ')
+    # print(decrypted)
+
     # output_name = "tests/encrypted.png"
     # output_name_2 = "tests/decrypted.png"
-    key = "asd123pl"
+    
     # is_file = "n"
     # encrypt = "y"
     # mode = "ecb"
-
-    encrypted = encrypt_string(input_name, key)
-    print('ENCRYPTED: ')
-    print(encrypted)
-    print('\n')
-    decrypted = decrypt_string(encrypted, key)
-    print('DECRYPTED: ')
-    print(decrypted)
 
     # encrypt_start = time.time()
     # print("ENCRYPTING")
