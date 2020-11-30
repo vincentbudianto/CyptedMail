@@ -15,6 +15,15 @@ const binReduction = 1n
 
 module.exports = {
     ECDSA: class {
+
+        /**
+         * 
+         * @param {BigInt} a 
+         * @param {BigInt} b 
+         * @param {BigInt} p 
+         * @param {Array} basePointNum 
+         * @param {BigInt} n 
+         */
         constructor(a, b, p, basePointNum, n) {
             // DEFAULT NIST-192
             if (a === undefined || b === undefined || p === undefined) {
@@ -43,18 +52,49 @@ module.exports = {
             }
         }
 
-        setPrivateKey(privateKey) {
-            this.privateKey = privateKey
-        }
-
-        setPrivateKeyRandom() {
+        setKeyRandom() {
             let binCount = this.curve.binSize - binReduction
             this.privateKey = utils.getRandomIntRange(binCount, 2n ** binCount + 2n, (this.curve.n - 2n))
-            this.setPublicKey()
+            this.privateKeyHex = this.privateKey.toString(16)
+            this.publicKey = this.curve.multiplyGraphPoint(this.curve.base, this.privateKey)
+            this.publicKeyHex = this.publicKey[0].toString(16) + ' ' + this.publicKey[1].toString(16)
         }
 
-        setPublicKey() {
-            this.publicKey = this.curve.multiplyGraphPoint(this.curve.base, this.privateKey)
+        /**
+         * 
+         * @param {BigInt} privateKey 
+         */
+        setPrivateKey(privateKey) {
+            this.privateKey = privateKey
+            this.privateKeyHex = this.privateKey.toString(16)
+        }
+
+        /**
+         * 
+         * @param {Array} publicKey 
+         */
+        setPublicKey(publicKey) {
+            this.publicKey = publicKey
+            this.publicKeyHex = this.publicKey[0].toString(16) + ' ' + this.publicKey[1].toString(16)
+        }
+
+        /**
+         * 
+         * @param {String} privateKeyHex 
+         */
+        setPrivatekeyHex(privateKeyHex) {
+            this.privateKeyHex = privateKeyHex
+            this.privateKey = BigInt('0x' + privateKeyHex)
+        }
+
+        /**
+         * 
+         * @param {String} publicKeyHex 
+         */
+        setPublicKeyHex(publicKeyHex) {
+            this.publicKeyHex = publicKeyHex
+            let splittedPublic = publicKeyHex.split(" ")
+            this.publicKey = [BigInt('0x' + splittedPublic[0]), BigInt('0x' + splittedPublic[1])]
         }
 
         initiateK(privateKey) {
@@ -78,9 +118,12 @@ module.exports = {
             return true;
         }
 
-        sign(message, privateKey) {
+        sign(message, privateKey, hexedKey = false, hexedOutput = false) {
             let s = 0n
             let r = 0n
+            if (hexedKey) {
+                privateKey = BigInt('0x' + privateKey)
+            }
 
             while (s === 0n) {
                 // STEP 1 & 2: count k and qa
@@ -107,21 +150,38 @@ module.exports = {
 
                     // STEP 6: count s, if 0, repeat
                     s = utils.mod((invK * sumEDR), this.curve.n)
-                    // safe method (makes sure)
                     if (isNaN(Number(utils.modInverse(s, this.curve.n)))) {
                         s = 0n
                     } else {
-                        console.log('k =', k, '; qa =', qa, 'e =', e, 'sumEDR =', sumEDR, 'invK =', invK)
+                        // console.log('k =', k, '; qa =', qa, 'e =', e, 'sumEDR =', sumEDR, 'invK =', invK)
                     }
                 }
             }
 
-            return [r, s]
+            if (!hexedOutput) {
+                return [r, s]
+            } else {
+                return (r.toString(16) + ' ' + s.toString(16))
+            }
         }
 
-        verify(message, signature, publicKey, privateKey) {
-            let r = signature[0]
-            let s = signature[1]
+        verify(message, signature, publicKey, hexedKey = false, hexedSign = false) {
+            let r = 0
+            let s = 0
+            if (hexedKey) {
+                let splitted = publicKey.split(" ")
+                publicKey = [BigInt('0x' + splitted[0]), BigInt('0x' + splitted[1])]
+            }
+
+            if (!hexedSign) {
+                r = signature[0]
+                s = signature[1]
+            } else {
+                let splitted = signature.split(" ")
+                r = BigInt('0x' + splitted[0])
+                s = BigInt('0x' + splitted[1])
+            }
+            
 
             // STEP 1: VERIFY range of r and s
             if (r >= this.curve.n || r <= 0 || s >= this.curve.n || s <= 0) {
@@ -138,49 +198,18 @@ module.exports = {
             // STEP 4: find u1 and u2
             let u1 = utils.mod((e * w), this.curve.n)
             let u2 = utils.mod((r * w), this.curve.n)
-            
-            // console.log('TEST')
-            // console.log('Should be k = ', utils.mod((u1 + u2 * privateKey), this.curve.n))
-            // console.log('Should be private key =', privateKey)
-            // console.log('Should be public key =', this.curve.multiplyGraphPoint(this.curve.base, privateKey))
-            // let shouldBeK = utils.mod((u1 + u2 * this.privateKey), this.curve.n)
-            // console.log('Should be result = ', this.curve.multiplyGraphPoint(this.curve.base, shouldBeK))
-            // console.log('Public key =', publicKey)
-            
-            // console.log('TEST POINT')
-            // let kMinusD = utils.mod(shouldBeK - privateKey, this.curve.n)
-            // console.log(kMinusD)
-            // let kMinusDPoint = this.curve.multiplyGraphPoint(this.curve.base, kMinusD)
-            // console.log(kMinusDPoint)
-            // kMinusDPoint = this.curve.sumGraphPoint(kMinusDPoint, this.curve.base)
 
-            // console.log(this.curve.sumGraphPoint(publicKey, kMinusDPoint))
-
-            // console.log('RANGE POINT')
-            // for (let i = -3n; i <= 3n; i++) {
-            //     console.log(i, this.curve.multiplyGraphPoint(this.curve.base, shouldBeK + i))
-            // }
-
-            // Step 5: calculate X
+            // STEP 5: calculate X
             let u1g = this.curve.multiplyGraphPoint(this.curve.base, u1)
-            // console.log(u1g)
             let u2q = this.curve.multiplyGraphPoint(publicKey, u2)
             let x = this.curve.sumGraphPoint(u1g, u2q)
-            // console.log(x)
-            // console.log(r)
-            // console.log('X total:', x)
 
-            // Step 6: Validate X not infinite
+            // STEP 6: Validate X not infinite
             if (x[0] === -1 || x[1] === -1) {
                 return false
             }
             let x1 = x[0]
             let v = utils.mod(x1, this.curve.n)
-
-            // console.log('V =', v)
-            // console.log('R =', r)
-
-            // console.log(v === r)
 
             return (v === r)
         }
