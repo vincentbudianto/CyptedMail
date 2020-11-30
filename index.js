@@ -137,7 +137,6 @@ function sendMessage(auth) {
   const subject = 'TEST GMAIL API';
   const utf8Subject = `=?utf-8?B?${Buffer.from(subject).toString('base64')}?=`;
   const messageParts = [
-    'From: 13517066 Willy Santoso <13517066@std.stei.itb.ac.id>',
     'To: Willy Santoso <willysantoso05@gmail.com>',
     'Content-Type: text/html; charset=utf-8',
     'MIME-Version: 1.0',

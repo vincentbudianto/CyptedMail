@@ -16,6 +16,10 @@ app.get('', (req, res) => {
     res.render('index')
 })
 
+app.get('/sign', (req, res) => {
+    res.render('signIn')
+})
+
 app.listen(port, () => {
     console.log(`App run on port : ${port}`)
 });
