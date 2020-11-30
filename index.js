@@ -3,7 +3,7 @@ const readline = require('readline');
 const {google} = require('googleapis');
 
 // If modifying these scopes, delete token.json.
-const SCOPES = ['https://www.googleapis.com/auth/gmail.readonly'];
+const SCOPES = ['https://www.googleapis.com/auth/gmail.readonly', 'https://www.googleapis.com/auth/gmail.send'];
 // The file token.json stores the user's access and refresh tokens, and is
 // created automatically when the authorization flow completes for the first
 // time.
@@ -22,7 +22,12 @@ fs.readFile('credentials.json', (err, content) => {
   /*
     BUAT NYOBA DAPETIN List Message
   */
-  authorize(JSON.parse(content), listMessages);
+  // authorize(JSON.parse(content), listMessages);
+
+  /*
+    BUAT NYOBA DAPETIN List Message
+  */
+  authorize(JSON.parse(content), sendMessage);
 });
 
 /**
@@ -118,5 +123,53 @@ function listMessages(auth) {
     } else {
       console.log('No labels found.');
     }
+  });
+}
+
+/**
+ * Lists the messages in the user's account.
+ *
+ * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
+ */
+function sendMessage(auth) {
+  const gmail = google.gmail({version: 'v1', auth});
+
+  const subject = 'TEST GMAIL API';
+  const utf8Subject = `=?utf-8?B?${Buffer.from(subject).toString('base64')}?=`;
+  const messageParts = [
+    'From: 13517066 Willy Santoso <13517066@std.stei.itb.ac.id>',
+    'To: Willy Santoso <willysantoso05@gmail.com>',
+    'Content-Type: text/html; charset=utf-8',
+    'MIME-Version: 1.0',
+    `Subject: ${utf8Subject}`,
+    '',
+    'This is a message just to say hello.',
+    'So... <b>Hello!</b>  🤘❤️😎',
+  ];
+  const message = messageParts.join('\n');
+
+  // The body needs to be base64url encoded.
+  const encodedMessage = Buffer.from(message)
+    .toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+
+  gmail.users.messages.send({
+    userId: 'me',
+    requestBody: {
+      raw: encodedMessage,
+    },
+  }, (err, res) => {
+    if (err) return console.log('The API returned an error: ' + err);
+    // const messages = res.data.messages;
+    // if (messages.length) {
+    //   console.log('Messages:');
+    //   messages.forEach((message) => {
+    //     console.log(`- ${message.id} | ${message.threadId}`);
+    //   });
+    // } else {
+    console.log('No labels found.');
+    // }
   });
 }
