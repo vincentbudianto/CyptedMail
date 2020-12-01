@@ -359,6 +359,43 @@ app.get('/trash', (req, res) => {
     }
 })
 
+app.get('/mail/:id', (req, res) => {
+    gmail.users.messages.get({
+        'userId': 'me',
+        'id': message.id
+    }, (err, message) => {
+        if (err) console.log('The API 2 returned an error: ' + err);
+        // console.log(message.data.payload.headers);
+        body = Buffer.from(message.data.payload.parts[0].body.data, 'base64');
+        // console.log('Message :', body.toString("utf-8"));
+
+        let data = {
+            'id': message.data.id,
+            'from': message.data.payload.headers.find(x => x.name === "From").value,
+            'to': message.data.payload.headers.find(x => x.name === "To").value,
+            'subject': message.data.payload.headers.find(x => x.name === "Subject").value.replace(/[^a-zA-Z0-9:']/g, " "),
+            'body': body.toString("utf-8"),
+            'date': new Date(Number(message.data.internalDate) / 1000)
+        };
+
+        result.push(data);
+
+        if (result.length == messages.length) {
+            // console.log('------------------------');
+            // console.log('result :');
+            // console.log(result);
+            res.render('index', {
+                result: result,
+                app_url: process.env.APP_URL,
+                token: req.session.token,
+                client_id: process.env.CLIENT_ID,
+                client_secret: process.env.CLIENT_SECRET
+            })
+            // res.redirect('/trash/' + nextToken)
+        }
+    })
+})
+
 app.post('/new-email', async (req, res) => {
     let data = req.body
     if (data.targetEmail == undefined ||

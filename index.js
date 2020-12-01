@@ -113,7 +113,7 @@ function getInbox(auth) {
   gmail.users.messages.list({
     userId: 'me',
     labelIds: 'INBOX',
-    maxResults: 5
+    maxResults: 1
   }, (err, res) => {
     if (err) return console.log('The API returned an error: ' + err);
     const messages = res.data.messages;
@@ -127,7 +127,11 @@ function getInbox(auth) {
           if (err) return console.log('The API returned an error: ' + err);
           let result = res.data;
           console.log(`- ${result.id} | ${result.threadId}`);
-          console.log('Message :', result.snippet);
+          console.log('Snippet :', result.snippet);
+          console.log('Headers :', result.payload.headers);
+          // console.log('Message :', result.payload.parts[0].body.data);
+          // data = Buffer.from(result.payload.parts[0].body.data, 'base64');
+          // console.log('Message :', data.toString("utf-8"));
         });
       });
     } else {
