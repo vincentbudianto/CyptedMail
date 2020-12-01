@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <title>E-mail Client Template | PrepBootstrap</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="google-signin-client_id" content=<%= client_id %>>
 
     <link rel="stylesheet" type="text/css" href="/bootstrap/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/font-awesome/css/font-awesome.min.css" />
@@ -17,7 +18,37 @@
 
 <div class="page-header">
     <h1>E-mail Client <small>A responsive e-mail client layout</small></h1>
+    <a href="#" onclick="signOut();">Sign out</a>
 </div>
+<script src="https://apis.google.com/js/platform.js?onload=onLoad" async defer></script>
+
+<script>
+    function signOut() {
+        window.location.href = "<%= app_url %>" + "logout";
+        console.log('User signed out.');
+    }
+
+    function inbox() {
+        window.location.href = "<%= app_url %>" + "inbox";
+        console.log('get inbox.');
+    }
+
+    function sent() {
+        window.location.href = "<%= app_url %>" + "sent";
+        console.log('get sent.');
+    }
+
+    function spam() {
+        window.location.href = "<%= app_url %>" + "spam";
+        console.log('get spam.');
+    }
+
+    function trash() {
+        window.location.href = "<%= app_url %>" + "trash";
+        console.log('get trash.');
+    }
+
+</script>
 
 <!-- E-mail Client - START -->
 
@@ -35,7 +66,7 @@
                                 <span class="icon-bar"></span>
                                 <span class="icon-bar"></span>
                             </button>
-                            <a class="navbar-brand" id="brand" href="#">Hello, <u>Obama!</u></a>
+                            <a class="navbar-brand" id="brand" href="#">Hello, <u>User!</u></a>
                         </div>
                     </div>
                 </nav>
@@ -46,7 +77,11 @@
                         <button id="btn_email" class="btn btn-danger" data-toggle="modal" data-target="#myModal">
                             New E-mail
                         </button>
-                        <div id="treeview">
+                        <div id="loltreeview">
+                            <button onclick="inbox()">Inbox</button>
+                            <button onclick="sent()">Sent</button>
+                            <button onclick="spam()">Spam</button>
+                            <button onclick="trash()">Trash</button>
                         </div>
                     </div>
                     <!-- /.navbar-collapse -->
@@ -136,14 +171,14 @@
                                 </div>
                             </div>
                         </div>
+                        <form id="new-email" method="POST" action="/new-email">
                         <div class="modal-body">
-                            <form>
                                 <div class="form-group row">
                                     <div class="col-md-3">
                                         <p>To: </p>
                                     </div>
                                     <div class="col-md-9">
-                                        <input type="text" name="search" placeholder="Enter e-mail" class="form-control">
+                                        <input type="text" name="targetEmail" placeholder="Enter e-mail" class="form-control">
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -151,7 +186,7 @@
                                         <p>Subject: </p>
                                     </div>
                                     <div class="col-md-9">
-                                        <input type="text" name="search" class="form-control">
+                                        <input type="text" name="newSubject" class="form-control">
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -159,19 +194,59 @@
                                         <p>Message: </p>
                                     </div>
                                     <div class="col-md-9">
-                                        <textarea class="form-control" rows="10"></textarea>
+                                        <textarea name="newMessage" class="form-control-message" rows="10"></textarea>
                                     </div>
                                 </div>
-                            </form>
-                        </div>
-                        <div class="modal-footer">
-                            <button class="btn btn-primary pull-left" id="btn_file">
-                                <span class="fa fa-paperclip fa-2x"></span>
-                                <input type="file" id="file" style="display: none;" />
-                            </button>
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                            <button type="button" class="btn btn-primary">Send</button>
-                        </div>
+                                <div class="form-group row">
+                                    <div class="col-md-3">
+                                        <p>ECDSA Public Key: </p>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <input type="text" name="newECDSAPublicKey" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-md-3">
+                                        <p>ECDSA Private Key: </p>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <input type="text" name="newECDSAPrivateKey" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-md-3">
+                                        <p>Cipher Key: </p>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <input type="text" name="newCipherKey" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-md-3">
+                                        <p>Signed? </p>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <input type=checkbox name="signed"></input>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-md-3">
+                                        <p>Encrypted? </p>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <input type=checkbox name="encrypted"></input>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-primary pull-left" id="btn_file">
+                                    <span class="fa fa-paperclip fa-2x"></span>
+                                    <input name="attached_file" type="file" id="file" style="display: none;" />
+                                </button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary">Send</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -186,9 +261,8 @@
 <!-- you need to include the shieldui css and js assets in order for the charts to work -->
 <link rel="stylesheet" type="text/css" href="http://www.shieldui.com/shared/components/latest/css/light-bootstrap/all.min.css" />
 <script type="text/javascript" src="http://www.shieldui.com/shared/components/latest/js/shieldui-all.min.js"></script>
-
 <script type="text/javascript">
-    var dataSrc = [
+    let dataSrc = [
 	{
 	    "text": "Inbox",
 	    "iconCls": "fa fa-envelope"
@@ -222,47 +296,65 @@
     }
 ];
 
-var gridData = [
+let gridData = [
     {
-        "check": "<input type=\"checkbox\"></input>",
-        "icon": "<span class=\"fa fa-envelope\"></span>",
-        "message": "Class starting",
-        "attach": "<span class=\"fa fa-paperclip\"></span>",
-        "date": "9:27 AM"
+        "sender" : "<%= result[0].from %>",
+        "message": "<%= result[0].subject %>",
+        "date": "<%= result[0].date %>"
     },
     {
-        "check": "<input type=\"checkbox\"></input>",
-        "icon": "<span class=\"fa fa-envelope-open\"></span>",
-        "message": "Sign up today for Lorem!",
-        "attach": "",
-        "date": "13:12 PM"
+        "sender" : "<%= result[1].from %>",
+        "message": "<%= result[1].subject %>",
+        "date": "<%= result[1].date %>"
     },
     {
-        "check": "<input type=\"checkbox\"></input>",
-        "icon": "<span class=\"fa fa-envelope-open\"></span>",
-        "message": "You have new like on your picture!",
-        "attach": "",
-        "date": "7:09 AM"
+        "sender" : "<%= result[2].from %>",
+        "message": "<%= result[2].subject %>",
+        "date": "<%= result[2].date %>"
     },
     {
-        "check": "<input type=\"checkbox\"></input>",
-        "icon": "<span class=\"fa fa-envelope\"></span>",
-        "message": "Don't open me!",
-        "attach": "<span class=\"fa fa-paperclip\"></span>",
-        "date": "4:47 AM"
+        "sender" : "<%= result[3].from %>",
+        "message": "<%= result[3].subject %>",
+        "date": "<%= result[3].date %>"
     },
     {
-        "check": "<input type=\"checkbox\"></input>",
-        "icon": "<span class=\"fa fa-envelope-open\"></span>",
-        "message": "Confirm your e-mail address",
-        "attach": "",
-        "date": "11:53 PM"
+        "sender" : "<%= result[4].from %>",
+        "message": "<%= result[4].subject %>",
+        "date": "<%= result[4].date %>"
     }
 ];
 
 $(function () {
+    $("#inboxButton").click(function () {
+        window.location.href = "<%= app_url %>" + "inbox";
+        console.log('get inbox.');
+    })
+
     $("#treeview").shieldTreeView({
-        dataSource: dataSrc
+        dataSource: dataSrc,
+        events: {
+            click: function (e) {
+                if (e.text == "Inbox") {
+                    window.location.href = "<%= app_url %>" + "inbox";
+                    console.log('get inbox.');
+                }
+
+                if (e.text == "Sent Mail") {
+                    window.location.href = "<%= app_url %>" + "sent";
+                    console.log('get sent.');
+                }
+
+                if (e.text == "Spam") {
+                    window.location.href = "<%= app_url %>" + "spam";
+                    console.log('get spam.');
+                }
+
+                if (e.text == "Trash") {
+                    window.location.href = "<%= app_url %>" + "trash";
+                    console.log('get trash.');
+                }
+            }
+        },
     });
 
     $("#grid").shieldGrid({
@@ -282,12 +374,21 @@ $(function () {
             toggle: false
         },
         columns: [
-            { field: "check", title: "&nbsp;", width: "2em", attributes: { style: "text-align: center;" } },
-            { field: "icon", title: "&nbsp;", width: "2em", attributes: { style: "text-align: center;" } },
+            // { field: "check", title: "&nbsp;", width: "2em", attributes: { style: "text-align: center;" } },
+            // { field: "icon", title: "&nbsp;", width: "2em", attributes: { style: "text-align: center;" } },
+            { field: "sender", title: "Sender", width: "10em" },
             { field: "message", title: "Subject", width: "17em" },
-            { field: "attach", title: "&nbsp;", width: "2em", attributes: { style: "text-align: center;" } },
+            // { field: "attach", title: "&nbsp;", width: "2em", attributes: { style: "text-align: center;" } },
             { field: "date", title: "Delivered", width: "6em" }
-        ]
+        ],
+        events: {
+            command: function (e) {
+                if (e.commandName == "selectionChanged") {
+                    let toBeSelected = e.toBeSelected;  //- array with all elements which will be selected
+                    console.log(e.indices[0]);
+                }
+            }
+        }
     });
 })
 </script>

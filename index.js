@@ -20,14 +20,14 @@ fs.readFile('credentials.json', (err, content) => {
   // authorize(JSON.parse(content), listLabels);
 
   /*
-    BUAT NYOBA DAPETIN List Message
+    BUAT NYOBA DAPETIN Message
   */
-  // authorize(JSON.parse(content), listMessages);
+  authorize(JSON.parse(content), getInbox);
 
   /*
-    BUAT NYOBA DAPETIN List Message
+    BUAT NYOBA Send Message
   */
-  authorize(JSON.parse(content), sendMessage);
+  // authorize(JSON.parse(content), sendMessage);
 });
 
 /**
@@ -108,17 +108,60 @@ function listLabels(auth) {
  *
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
-function listMessages(auth) {
+function getInbox(auth) {
   const gmail = google.gmail({version: 'v1', auth});
   gmail.users.messages.list({
     userId: 'me',
+    labelIds: 'INBOX',
+    maxResults: 5
   }, (err, res) => {
     if (err) return console.log('The API returned an error: ' + err);
     const messages = res.data.messages;
     if (messages.length) {
-      console.log('Messages:');
+      console.log('Inbox:');
       messages.forEach((message) => {
-        console.log(`- ${message.id} | ${message.threadId}`);
+        gmail.users.messages.get({
+          'userId': 'me',
+          'id': message.id
+        }, (err, res) => {
+          if (err) return console.log('The API returned an error: ' + err);
+          let result = res.data;
+          console.log(`- ${result.id} | ${result.threadId}`);
+          console.log('Message :', result.snippet);
+        });
+      });
+    } else {
+      console.log('No labels found.');
+    }
+  });
+}
+
+/**
+ * Lists the messages in the user's account.
+ *
+ * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
+ */
+function getSent(auth) {
+  const gmail = google.gmail({version: 'v1', auth});
+  gmail.users.messages.list({
+    userId: 'me',
+    labelIds: 'SENT',
+    maxResults: 5
+  }, (err, res) => {
+    if (err) return console.log('The API returned an error: ' + err);
+    const messages = res.data.messages;
+    if (messages.length) {
+      console.log('Inbox:');
+      messages.forEach((message) => {
+        gmail.users.messages.get({
+          'userId': 'me',
+          'id': message.id
+        }, (err, res) => {
+          if (err) return console.log('The API returned an error: ' + err);
+          let result = res.data;
+          console.log(`- ${result.id} | ${result.threadId}`);
+          console.log('Message :', result.snippet);
+        });
       });
     } else {
       console.log('No labels found.');
@@ -137,7 +180,7 @@ function sendMessage(auth) {
   const subject = 'TEST GMAIL API';
   const utf8Subject = `=?utf-8?B?${Buffer.from(subject).toString('base64')}?=`;
   const messageParts = [
-    'To: Willy Santoso <willysantoso05@gmail.com>',
+    'To: willysantoso05@gmail.com',
     'Content-Type: text/html; charset=utf-8',
     'MIME-Version: 1.0',
     `Subject: ${utf8Subject}`,
@@ -171,4 +214,10 @@ function sendMessage(auth) {
     console.log('No labels found.');
     // }
   });
+}
+
+module.exports = {
+  listLabels,
+  getInbox,
+  getSent
 }

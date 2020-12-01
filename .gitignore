@@ -1,4 +1,6 @@
+.env
 credentials.json
+web_credentials.json
 token.json
 
 # Logs

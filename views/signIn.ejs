@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <title>E-mail Client Template | PrepBootstrap</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="google-signin-client_id" content="962501887177-8tt1cmqvflj29rjjed9n9uhihe8pir9a.apps.googleusercontent.com">
+    <meta name="google-signin-client_id" content=<%= client_id %>>
 
     <link rel="stylesheet" type="text/css" href="/bootstrap/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="/font-awesome/css/font-awesome.min.css" />
@@ -20,10 +20,16 @@
     <h1>E-mail Client <small>A responsive e-mail client layout</small></h1>
 </div>
 
-
-<div class="g-signin2" data-onsuccess="onSignIn"></div>
+<button id='buttonSign'>SIGN IN AND GIVE PERMISSION</button>
 <script src="https://apis.google.com/js/platform.js" async defer></script>
 
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#buttonSign').click(function() {
+            window.location.href = "<%= app_url %>" + 'signin'
+        });
+    });
+    </script>
 </div>
 
 </body>
