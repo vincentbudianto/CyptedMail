@@ -2,6 +2,7 @@ require('dotenv').config()
 
 // load the things we need
 const express = require('express');
+const bodyParser = require("body-parser");
 const { google } = require('googleapis');
 const session = require('express-session');
 const app = express();
@@ -33,6 +34,10 @@ app.use('/js', express.static(__dirname + '/js'))
 app.use('/css', express.static(__dirname + '/css'))
 app.use('/bootstrap', express.static(__dirname + '/bootstrap'))
 app.use('/font-awesome', express.static(__dirname + '/font-awesome'))
+
+//Here we are configuring express to use body-parser as middle-ware.
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
 // Setup session
 app.use(session({
@@ -76,7 +81,7 @@ app.get('', (req, res) => {
 
 app.get('/sign', (req, res) => {
     if (req.session.token !== undefined) {
-        res.redirect('/')
+        res.redirect('/inbox')
     } else {
         res.render('signIn',
         {
@@ -218,7 +223,7 @@ app.get('/sent', (req, res) => {
                             client_id: process.env.CLIENT_ID,
                             client_secret: process.env.CLIENT_SECRET
                         })
-                        // res.redirect('/inbox/' + nextToken)
+                        // res.redirect('/sent/' + nextToken)
                     }
                 })
             });
@@ -276,12 +281,12 @@ app.get('/spam', (req, res) => {
                             client_id: process.env.CLIENT_ID,
                             client_secret: process.env.CLIENT_SECRET
                         })
-                        // res.redirect('/inbox/' + nextToken)
+                        // res.redirect('/spam/' + nextToken)
                     }
                 })
             });
         } else {
-            console.log('Inbox empty.');
+            console.log('Spam empty.');
         }
     });
 })
@@ -334,12 +339,12 @@ app.get('/trash', (req, res) => {
                             client_id: process.env.CLIENT_ID,
                             client_secret: process.env.CLIENT_SECRET
                         })
-                        // res.redirect('/inbox/' + nextToken)
+                        // res.redirect('/trash/' + nextToken)
                     }
                 })
             });
         } else {
-            console.log('Inbox empty.');
+            console.log('Trash empty.');
         }
     });
 })
@@ -352,7 +357,7 @@ app.post('/new-email', async (req, res) => {
         res.redirect('/');
     }
     let message = data.newMessage
-    console.log(message);
+    console.log("Message : " + message);
     if (data.signed) {
         let ecdsa_code = new ecdsa.ECDSA(a, b, p, g, n);
         let publickey = data.newECDSAPublicKey;
@@ -369,7 +374,7 @@ app.post('/new-email', async (req, res) => {
             res.redirect('/');
         }
     }
-
+    console.log("AAA");
     if (data.encrypted) {
         let Enckey = data.newCipherKey
         // Encryption
@@ -382,9 +387,9 @@ app.post('/new-email', async (req, res) => {
             res.redirect('/')
         }
     }
-
+    console.log("BBB");
     // Send message here
-    sendEmail = sendEmail(data.newSubject, data.targetEmail, messsage, oAuth2Client)
+    sendEmail = sendEmail(data.newSubject, data.targetEmail, message, oAuth2Client)
     res.redirect('/')
 })
 
