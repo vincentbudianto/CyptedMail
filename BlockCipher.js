@@ -6,7 +6,7 @@ module.exports = {
         let options = {
             mode: 'text',
             encoding: 'utf8',
-            pythonPath: 'D:/Installed Programs/Python/python',
+            pythonPath: process.env.PYTHON_PATH,
             pythonOptions: ['-u'],
             scriptPath: './BE_BlockCipher/',
             args: ['encrypt', plainText, key]
