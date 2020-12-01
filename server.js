@@ -67,13 +67,7 @@ app.listen(port, () => {
 
 app.get('', (req, res) => {
     if (req.session.token !== undefined) {
-        res.render('index',
-        {
-            app_url: process.env.APP_URL,
-            token: req.session.token,
-            client_id: process.env.CLIENT_ID,
-            client_secret: process.env.CLIENT_SECRET
-        })
+        res.redirect('/inbox')
     } else {
         res.redirect("/sign")
     }
@@ -118,235 +112,251 @@ app.get('/logout', (req, res) => {
 })
 
 app.get('/inbox', (req, res) => {
-    const gmail = google.gmail({version: 'v1', auth: oAuth2Client});
-    let pageToken = ''
+    if (req.session.token !== undefined) {
+        const gmail = google.gmail({version: 'v1', auth: oAuth2Client});
+        let pageToken = ''
 
-    gmail.users.messages.list({
-        userId: 'me',
-        labelIds: 'INBOX',
-        pageToken: pageToken,
-        includeSpamTrash: true,
-        q: '',
-        maxResults: 10
-    }, (err, messageList) => {
-        if (err) return console.log('The API 1 returned an error: ' + err);
-        const messages = messageList.data.messages;
-        const nextToken = messageList.data.nextPageToken;
+        gmail.users.messages.list({
+            userId: 'me',
+            labelIds: 'INBOX',
+            pageToken: pageToken,
+            includeSpamTrash: true,
+            q: '',
+            maxResults: 10
+        }, (err, messageList) => {
+            if (err) return console.log('The API 1 returned an error: ' + err);
+            const messages = messageList.data.messages;
+            const nextToken = messageList.data.nextPageToken;
 
-        if (messages.length) {
-            let result = []
+            if (messages.length) {
+                let result = []
 
-            messages.forEach((message) => {
-                // console.log('message :', message)
-                gmail.users.messages.get({
-                    'userId': 'me',
-                    'id': message.id
-                }, (err, message) => {
-                    if (err) console.log('The API 2 returned an error: ' + err);
-                    // console.log(message.data.payload.headers);
+                messages.forEach((message) => {
+                    // console.log('message :', message)
+                    gmail.users.messages.get({
+                        'userId': 'me',
+                        'id': message.id
+                    }, (err, message) => {
+                        if (err) console.log('The API 2 returned an error: ' + err);
+                        // console.log(message.data.payload.headers);
 
-                    let data = {
-                        'id': message.data.id,
-                        'from': message.data.payload.headers.find(x => x.name === "From").value,
-                        'subject': message.data.payload.headers.find(x => x.name === "Subject").value.replace(/[^a-zA-Z0-9:']/g, " "),
-                        'date': new Date(Number(message.data.internalDate) / 1000)
-                    };
+                        let data = {
+                            'id': message.data.id,
+                            'from': message.data.payload.headers.find(x => x.name === "From").value,
+                            'subject': message.data.payload.headers.find(x => x.name === "Subject").value.replace(/[^a-zA-Z0-9:']/g, " "),
+                            'date': new Date(Number(message.data.internalDate) / 1000)
+                        };
 
-                    result.push(data);
+                        result.push(data);
 
-                    if (result.length == messages.length) {
-                        // console.log('------------------------');
-                        // console.log('result :');
-                        // console.log(result);
-                        res.render('index', {
-                            result: result,
-                            app_url: process.env.APP_URL,
-                            token: req.session.token,
-                            client_id: process.env.CLIENT_ID,
-                            client_secret: process.env.CLIENT_SECRET
-                        })
-                        // res.redirect('/inbox/' + nextToken)
-                    }
-                })
-            });
-        } else {
-            console.log('Inbox empty.');
-        }
-    });
+                        if (result.length == messages.length) {
+                            // console.log('------------------------');
+                            // console.log('result :');
+                            // console.log(result);
+                            res.render('index', {
+                                result: result,
+                                app_url: process.env.APP_URL,
+                                token: req.session.token,
+                                client_id: process.env.CLIENT_ID,
+                                client_secret: process.env.CLIENT_SECRET
+                            })
+                            // res.redirect('/inbox/' + nextToken)
+                        }
+                    })
+                });
+            } else {
+                console.log('Inbox empty.');
+            }
+        });
+    } else {
+        res.redirect("/sign")
+    }
 })
 
 app.get('/sent', (req, res) => {
-    const gmail = google.gmail({version: 'v1', auth: oAuth2Client});
-    let pageToken = ''
+    if (req.session.token !== undefined) {
+        const gmail = google.gmail({version: 'v1', auth: oAuth2Client});
+        let pageToken = ''
 
-    gmail.users.messages.list({
-        userId: 'me',
-        labelIds: 'SENT',
-        pageToken: pageToken,
-        includeSpamTrash: true,
-        q: '',
-        maxResults: 10
-    }, (err, messageList) => {
-        if (err) return console.log('The API 1 returned an error: ' + err);
-        const messages = messageList.data.messages;
-        const nextToken = messageList.data.nextPageToken;
+        gmail.users.messages.list({
+            userId: 'me',
+            labelIds: 'SENT',
+            pageToken: pageToken,
+            includeSpamTrash: true,
+            q: '',
+            maxResults: 10
+        }, (err, messageList) => {
+            if (err) return console.log('The API 1 returned an error: ' + err);
+            const messages = messageList.data.messages;
+            const nextToken = messageList.data.nextPageToken;
 
-        if (messages.length) {
-            let result = []
+            if (messages.length) {
+                let result = []
 
-            messages.forEach((message) => {
-                // console.log('message :', message)
-                gmail.users.messages.get({
-                    'userId': 'me',
-                    'id': message.id
-                }, (err, message) => {
-                    if (err) console.log('The API 2 returned an error: ' + err);
-                    // console.log(message.data.payload.headers);
+                messages.forEach((message) => {
+                    // console.log('message :', message)
+                    gmail.users.messages.get({
+                        'userId': 'me',
+                        'id': message.id
+                    }, (err, message) => {
+                        if (err) console.log('The API 2 returned an error: ' + err);
+                        // console.log(message.data.payload.headers);
 
-                    let data = {
-                        'id': message.data.id,
-                        'from': message.data.payload.headers.find(x => x.name === "From").value,
-                        'subject': message.data.payload.headers.find(x => x.name === "Subject").value.replace(/[^a-zA-Z0-9:']/g, " "),
-                        'date': new Date(Number(message.data.internalDate) / 1000)
-                    };
+                        let data = {
+                            'id': message.data.id,
+                            'from': message.data.payload.headers.find(x => x.name === "From").value,
+                            'subject': message.data.payload.headers.find(x => x.name === "Subject").value.replace(/[^a-zA-Z0-9:']/g, " "),
+                            'date': new Date(Number(message.data.internalDate) / 1000)
+                        };
 
-                    result.push(data);
+                        result.push(data);
 
-                    if (result.length == messages.length) {
-                        // console.log('------------------------');
-                        // console.log('result :');
-                        // console.log(result);
-                        res.render('index', {
-                            result: result,
-                            app_url: process.env.APP_URL,
-                            token: req.session.token,
-                            client_id: process.env.CLIENT_ID,
-                            client_secret: process.env.CLIENT_SECRET
-                        })
-                        // res.redirect('/sent/' + nextToken)
-                    }
-                })
-            });
-        } else {
-            console.log('Sent empty.');
-        }
-    });
+                        if (result.length == messages.length) {
+                            // console.log('------------------------');
+                            // console.log('result :');
+                            // console.log(result);
+                            res.render('index', {
+                                result: result,
+                                app_url: process.env.APP_URL,
+                                token: req.session.token,
+                                client_id: process.env.CLIENT_ID,
+                                client_secret: process.env.CLIENT_SECRET
+                            })
+                            // res.redirect('/sent/' + nextToken)
+                        }
+                    })
+                });
+            } else {
+                console.log('Sent Email empty.');
+            }
+        });
+    } else {
+        res.redirect("/sign")
+    }
 })
 
 app.get('/spam', (req, res) => {
-    const gmail = google.gmail({version: 'v1', auth: oAuth2Client});
-    let pageToken = ''
+    if (req.session.token !== undefined) {
+        const gmail = google.gmail({version: 'v1', auth: oAuth2Client});
+        let pageToken = ''
 
-    gmail.users.messages.list({
-        userId: 'me',
-        labelIds: 'SPAM',
-        pageToken: pageToken,
-        includeSpamTrash: true,
-        q: '',
-        maxResults: 10
-    }, (err, messageList) => {
-        if (err) return console.log('The API 1 returned an error: ' + err);
-        const messages = messageList.data.messages;
-        const nextToken = messageList.data.nextPageToken;
+        gmail.users.messages.list({
+            userId: 'me',
+            labelIds: 'SPAM',
+            pageToken: pageToken,
+            includeSpamTrash: true,
+            q: '',
+            maxResults: 10
+        }, (err, messageList) => {
+            if (err) return console.log('The API 1 returned an error: ' + err);
+            const messages = messageList.data.messages;
+            const nextToken = messageList.data.nextPageToken;
 
-        if (messages.length) {
-            let result = []
+            if (messages.length) {
+                let result = []
 
-            messages.forEach((message) => {
-                // console.log('message :', message)
-                gmail.users.messages.get({
-                    'userId': 'me',
-                    'id': message.id
-                }, (err, message) => {
-                    if (err) console.log('The API 2 returned an error: ' + err);
-                    // console.log(message.data.payload.headers);
+                messages.forEach((message) => {
+                    // console.log('message :', message)
+                    gmail.users.messages.get({
+                        'userId': 'me',
+                        'id': message.id
+                    }, (err, message) => {
+                        if (err) console.log('The API 2 returned an error: ' + err);
+                        // console.log(message.data.payload.headers);
 
-                    let data = {
-                        'id': message.data.id,
-                        'from': message.data.payload.headers.find(x => x.name === "From").value,
-                        'subject': message.data.payload.headers.find(x => x.name === "Subject").value.replace(/[^a-zA-Z0-9:']/g, " "),
-                        'date': new Date(Number(message.data.internalDate) / 1000)
-                    };
+                        let data = {
+                            'id': message.data.id,
+                            'from': message.data.payload.headers.find(x => x.name === "From").value,
+                            'subject': message.data.payload.headers.find(x => x.name === "Subject").value.replace(/[^a-zA-Z0-9:']/g, " "),
+                            'date': new Date(Number(message.data.internalDate) / 1000)
+                        };
 
-                    result.push(data);
+                        result.push(data);
 
-                    if (result.length == messages.length) {
-                        // console.log('------------------------');
-                        // console.log('result :');
-                        // console.log(result);
-                        res.render('index', {
-                            result: result,
-                            app_url: process.env.APP_URL,
-                            token: req.session.token,
-                            client_id: process.env.CLIENT_ID,
-                            client_secret: process.env.CLIENT_SECRET
-                        })
-                        // res.redirect('/spam/' + nextToken)
-                    }
-                })
-            });
-        } else {
-            console.log('Spam empty.');
-        }
-    });
+                        if (result.length == messages.length) {
+                            // console.log('------------------------');
+                            // console.log('result :');
+                            // console.log(result);
+                            res.render('index', {
+                                result: result,
+                                app_url: process.env.APP_URL,
+                                token: req.session.token,
+                                client_id: process.env.CLIENT_ID,
+                                client_secret: process.env.CLIENT_SECRET
+                            })
+                            // res.redirect('/spam/' + nextToken)
+                        }
+                    })
+                });
+            } else {
+                console.log('Spam empty.');
+            }
+        });
+    } else {
+        res.redirect("/sign")
+    }
 })
 
 app.get('/trash', (req, res) => {
-    const gmail = google.gmail({version: 'v1', auth: oAuth2Client});
-    let pageToken = ''
+    if (req.session.token !== undefined) {
+        const gmail = google.gmail({version: 'v1', auth: oAuth2Client});
+        let pageToken = ''
 
-    gmail.users.messages.list({
-        userId: 'me',
-        labelIds: 'TRASH',
-        pageToken: pageToken,
-        includeSpamTrash: true,
-        q: '',
-        maxResults: 10
-    }, (err, messageList) => {
-        if (err) return console.log('The API 1 returned an error: ' + err);
-        const messages = messageList.data.messages;
-        const nextToken = messageList.data.nextPageToken;
+        gmail.users.messages.list({
+            userId: 'me',
+            labelIds: 'TRASH',
+            pageToken: pageToken,
+            includeSpamTrash: true,
+            q: '',
+            maxResults: 10
+        }, (err, messageList) => {
+            if (err) return console.log('The API 1 returned an error: ' + err);
+            const messages = messageList.data.messages;
+            const nextToken = messageList.data.nextPageToken;
 
-        if (messages.length) {
-            let result = []
+            if (messages.length) {
+                let result = []
 
-            messages.forEach((message) => {
-                // console.log('message :', message)
-                gmail.users.messages.get({
-                    'userId': 'me',
-                    'id': message.id
-                }, (err, message) => {
-                    if (err) console.log('The API 2 returned an error: ' + err);
-                    // console.log(message.data.payload.headers);
+                messages.forEach((message) => {
+                    // console.log('message :', message)
+                    gmail.users.messages.get({
+                        'userId': 'me',
+                        'id': message.id
+                    }, (err, message) => {
+                        if (err) console.log('The API 2 returned an error: ' + err);
+                        // console.log(message.data.payload.headers);
 
-                    let data = {
-                        'id': message.data.id,
-                        'from': message.data.payload.headers.find(x => x.name === "From").value,
-                        'subject': message.data.payload.headers.find(x => x.name === "Subject").value.replace(/[^a-zA-Z0-9:']/g, " "),
-                        'date': new Date(Number(message.data.internalDate) / 1000)
-                    };
+                        let data = {
+                            'id': message.data.id,
+                            'from': message.data.payload.headers.find(x => x.name === "From").value,
+                            'subject': message.data.payload.headers.find(x => x.name === "Subject").value.replace(/[^a-zA-Z0-9:']/g, " "),
+                            'date': new Date(Number(message.data.internalDate) / 1000)
+                        };
 
-                    result.push(data);
+                        result.push(data);
 
-                    if (result.length == messages.length) {
-                        // console.log('------------------------');
-                        // console.log('result :');
-                        // console.log(result);
-                        res.render('index', {
-                            result: result,
-                            app_url: process.env.APP_URL,
-                            token: req.session.token,
-                            client_id: process.env.CLIENT_ID,
-                            client_secret: process.env.CLIENT_SECRET
-                        })
-                        // res.redirect('/trash/' + nextToken)
-                    }
-                })
-            });
-        } else {
-            console.log('Trash empty.');
-        }
-    });
+                        if (result.length == messages.length) {
+                            // console.log('------------------------');
+                            // console.log('result :');
+                            // console.log(result);
+                            res.render('index', {
+                                result: result,
+                                app_url: process.env.APP_URL,
+                                token: req.session.token,
+                                client_id: process.env.CLIENT_ID,
+                                client_secret: process.env.CLIENT_SECRET
+                            })
+                            // res.redirect('/trash/' + nextToken)
+                        }
+                    })
+                });
+            } else {
+                console.log('Trash empty.');
+            }
+        });
+    } else {
+        res.redirect("/sign")
+    }
 })
 
 app.post('/new-email', async (req, res) => {
@@ -357,7 +367,7 @@ app.post('/new-email', async (req, res) => {
         res.redirect('/');
     }
     let message = data.newMessage
-    console.log("Message : " + message);
+
     if (data.signed) {
         let ecdsa_code = new ecdsa.ECDSA(a, b, p, g, n);
         let publickey = data.newECDSAPublicKey;
@@ -367,14 +377,13 @@ app.post('/new-email', async (req, res) => {
             ecdsa_code.setPublicKeyHex(publickey);
 
             signature = ecdsa_code.sign(message, ecdsa_code.privateKeyHex, hexedKey = true, hexedOutput = true);
-            console.log('Signature =', signature);
 
-            message = message + '\n' + signature;
+            message = message + "<br>" + "-----BEGIN PGP SIGNATURE-----<br>" +  signature + "<br>-----END PGP SIGNATURE-----";
         } else {
             res.redirect('/');
         }
     }
-    console.log("AAA");
+
     if (data.encrypted) {
         let Enckey = data.newCipherKey
         // Encryption
@@ -387,10 +396,10 @@ app.post('/new-email', async (req, res) => {
             res.redirect('/')
         }
     }
-    console.log("BBB");
+
     // Send message here
     sendEmail = sendEmail(data.newSubject, data.targetEmail, message, oAuth2Client)
-    res.redirect('/')
+    res.redirect('/inbox')
 })
 
 function sendEmail(subj, email, text, auth) {
