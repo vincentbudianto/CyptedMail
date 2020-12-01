@@ -3,6 +3,7 @@ require('dotenv').config()
 // load the things we need
 const express = require('express');
 const bodyParser = require("body-parser");
+const fileUpload = require('express-fileupload');
 const { google } = require('googleapis');
 const session = require('express-session');
 const app = express();
@@ -38,6 +39,8 @@ app.use('/font-awesome', express.static(__dirname + '/font-awesome'))
 //Here we are configuring express to use body-parser as middle-ware.
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+
+app.use(fileUpload());
 
 // Setup session
 app.use(session({
@@ -137,20 +140,8 @@ app.get('/inbox', (req, res) => {
                         'userId': 'me',
                         'id': message.id
                     }, (err, message) => {
-                        if (err) console.log('The API 2 returned an error: ' + err);
-                        // console.log(message.data.payload.headers);
-
-                        let data = {
-                            'id': message.data.id,
-                            'from': message.data.payload.headers.find(x => x.name === "From").value,
-                            'subject': message.data.payload.headers.find(x => x.name === "Subject").value.replace(/[^a-zA-Z0-9:']/g, " "),
-                            'date': new Date(Number(message.data.internalDate) / 1000)
-                        };
-
-                        result.push(data);
-
-                        if (result.length == messages.length) {
-                            // console.log('------------------------');
+                        console.log(req.body);
+                        console.log(req.files);              // console.log('------------------------');
                             // console.log('result :');
                             // console.log(result);
                             res.render('index', {
@@ -397,14 +388,25 @@ app.get('/mail/:id', (req, res) => {
 })
 
 app.post('/new-email', async (req, res) => {
+    file_attach = true;
+    if (!req.files || Object.keys(req.files).length === 0) {
+        file_attach = false;
+        console.log('No files were uploaded.');
+    }
+
+    let files = undefined
+    if(file_attach){
+        files = req.files.attached_file
+    }
+    
     let data = req.body
     if (data.targetEmail == undefined ||
         data.newSubject == undefined ||
         data.newMessage == undefined) {
         res.redirect('/');
     }
-    let message = data.newMessage
 
+    let message = data.newMessage
     if (data.signed) {
         let ecdsa_code = new ecdsa.ECDSA(a, b, p, g, n);
         let publickey = data.newECDSAPublicKey;
@@ -435,23 +437,51 @@ app.post('/new-email', async (req, res) => {
     }
 
     // Send message here
-    sendEmail = sendEmail(data.newSubject, data.targetEmail, message, oAuth2Client)
+    sendingEmail = sendEmail(data.newSubject, data.targetEmail, message, files, oAuth2Client)
     res.redirect('/inbox')
 })
 
-function sendEmail(subj, email, text, auth) {
+function sendEmail(subj, email, text, files, auth) {
+    // console.log(files)
     const gmail = google.gmail({version: 'v1', auth: oAuth2Client});
 
     const subject = subj;
     const utf8Subject = `=?utf-8?B?${Buffer.from(subject).toString('base64')}?=`;
-    const messageParts = [
-        'To: ' + email,
-        'Content-Type: text/html; charset=utf-8',
-        'MIME-Version: 1.0',
-        `Subject: ${utf8Subject}`,
-        '',
-        text
-    ];
+    
+    var messageParts = []
+    if(files===undefined){
+        messageParts = [
+            'To: ' + email,
+            'Content-Type: text/html; charset=utf-8',
+            'MIME-Version: 1.0',
+            `Subject: ${utf8Subject}`,
+            '',
+            text
+        ];
+    }else{
+        var boundary = "__myapp__";
+        var nl = "\n";
+        var attach = files.data.toString("base64");
+        messageParts = [
+            "MIME-Version: 1.0",
+            "Content-Transfer-Encoding: 7bit",
+            "To: " + email,
+            "Subject: " + utf8Subject,
+            "Content-Type: multipart/alternate; boundary=" + boundary + nl,
+            "--" + boundary,
+            "Content-Type: text/plain; charset=UTF-8",
+            "Content-Transfer-Encoding: 7bit" + nl,
+            text+ nl,
+            "--" + boundary,
+            "--" + boundary,
+            `Content-Type: ${files.mimetype}; name=${files.name}`,
+            `Content-Disposition: attachment; filename=${files.name}`,
+            "Content-Transfer-Encoding: base64" + nl,
+            attach,
+            "--" + boundary + "--"
+        ]
+    }
+    
     const message = messageParts.join('\n');
 
     // The body needs to be base64url encoded.
