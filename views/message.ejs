@@ -13,7 +13,71 @@
     <script type="text/javascript" src="/bootstrap/js/bootstrap.min.js"></script>
 </head>
 <body>
+    <script>
+        function signOut() {
+            window.location.href = "<%= app_url %>" + "logout";
+            console.log('User signed out.');
+        }
 
+        function inbox() {
+            window.location.href = "<%= app_url %>" + "inbox";
+            console.log('get inbox.');
+        }
+
+        function sent() {
+            window.location.href = "<%= app_url %>" + "sent";
+            console.log('get sent.');
+        }
+
+        function spam() {
+            window.location.href = "<%= app_url %>" + "spam";
+            console.log('get spam.');
+        }
+
+        function trash() {
+            window.location.href = "<%= app_url %>" + "trash";
+            console.log('get trash.');
+        }
+
+        function base64ToArrayBuffer(base64) {
+            // let data = base64.replace('-', '+');
+            // data = data.replace('_', '/');
+            console.log(base64);
+            var binaryString = atob(base64.replace(/_/g, '/').replace(/-/g, '+'));
+            var binaryLen = binaryString.length;
+            var bytes = new Uint8Array(binaryLen);
+            for (var i = 0; i < binaryLen; i++) {
+                var ascii = binaryString.charCodeAt(i);
+                bytes[i] = ascii;
+            }
+            return bytes;
+        }
+
+        function download(result) {
+        }
+
+        "<% if (result.attachment != '') { %>"
+        console.log("TESTTT")
+        const element = document.createElement("a");
+        // console.log(result);
+        const data = base64ToArrayBuffer("<%= result.attachment.data %>");
+        // console.log(data);
+        const file = new Blob([data], {
+            type: "<% result.attachment.type %>"
+        });
+
+        element.className = "download-file";
+        element.id = "download";
+        element.href = URL.createObjectURL(file);
+        element.download = "<%= result.attachment.filename %>";
+        document.body.appendChild(element);
+        "<% } %>"
+    </script>
+<div class="container">
+    <div class="page-header">
+        <h1>E-mail Client <small>A responsive e-mail client layout</small></h1>
+        <a href="#" onclick="signOut();">Sign out</a>
+    </div>
     <div class="container pb-mail-template1">
         <div class="row">
             <div class="col-md-12">
@@ -36,60 +100,47 @@
                 <div class="row">
                     <div class="col-md-2" id="column-resize">
                         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                            <button id="btn_email" class="btn btn-danger" data-toggle="modal" data-target="#myModal">
-                                New E-mail
-                            </button>
-                            <div id="loltreeview">
-                                <button onclick="inbox()">Inbox</button>
-                                <button onclick="sent()">Sent</button>
-                                <button onclick="spam()">Spam</button>
-                                <button onclick="trash()">Trash</button>
+                            <div id="loltreeview" style="display: grid;">
+                                <button id="btn_email" class="btn btn-danger" data-toggle="modal" data-target="#myModal" style="margin-bottom: 15px;">
+                                    New E-mail
+                                </button>
+                                <button class="btn btn-block" onclick="inbox()">Inbox</button>
+                                <button class="btn btn-block" onclick="sent()">Sent</button>
+                                <button class="btn btn-block" onclick="spam()">Spam</button>
+                                <button class="btn btn-block" onclick="trash()">Trash</button>
                             </div>
                         </div>
                         <!-- /.navbar-collapse -->
                     </div>
                     <div class="col-md-10">
                         <div class="row" id="row_style">
-                            <div class="panel panel-default">
+                            <div class="panel panel-default" style="padding-bottom: 45px;">
                                 <div class="panel-heading">
                                     <div class="row">
                                         <div class="col-xs-4 col-md-4">
-                                            <p id="inbox_parag">INBOX</p>
-                                        </div>
-                                        <div class="col-xs-8 col-md-8">
-                                            <div class="input-group">
-                                                <input type="text" name="" placeholder="Seach...." class="form-control">
-                                                <span class="input-group-btn">
-                                                    <button class="btn btn-primary" type="button" tabindex="-1">
-                                                        <span class="fa fa-question fa-2x" area-hidden="true"></span>
-                                                    </button>
-                                                </span>
-                                            </div>
+                                            <h3 class="modal-title" id="myModalLabel"><%= result.subject %></h3>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="header">
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span></button>
-                                    <h4 class="modal-title" id="myModalLabel"><%= result.subject %></h4>
-                                    <h4 class="modal-title" id="myModalLabel"><%= result.from %></h4>
-                                    <h4 class="modal-title" id="myModalLabel"><%= result.to %></h4>
-                                    <h4 class="modal-title" id="myModalLabel"><%= result.date %></h4>
+                                <div class="header" style="margin-top: 10px;">
+                                    <h5 class="modal-title" id="myModalLabel" style="margin-left: 15px;"><b><%= result.from %></b></h5>
+                                    <h6 class="modal-title" id="myModalLabel" style="margin-left: 15px;">to: <%= result.to %></h6>
+                                    <h6 class="modal-title" id="myModalLabel" style="margin-left: 15px;"><%= result.date %></h6>
                                 </div>
-                                <div class="body">
-									<h4 class="modal-title" id="myModalLabel"><%= result.body %></h4>
+                                <div class="body" style="height: 25vh; margin: 15px 15px 15px 15px; border-style: solid; border-radius: 10px; border-width: 1px; padding: 7.5px; border-color: #ccc;">
+									<span class="modal-title" id="myModalLabel"><%= result.body %></span>
                                 </div>
-                                <div class="form">
+                                <div class="form" style="margin-bottom: 15px;">
                                     <form method="POST" action="/decrypt">
                                         <div class="col-md-3">
                                             <p>BlockCipher Key: </p>
                                         </div>
 
                                         <div class="col-md-9">
-                                            <input type="text" name="key" placeholder="Enter key" class="form-control">
+                                            <input type="text" name="key" placeholder="Enter key" class="form-control" maxlength="8">
                                         </div>
                                         <input hidden value="<%= result.body %>" name="message">
-                                        <button type="submit" class="btn btn-primary">Decrypt</button>
+                                        <button type="submit" class="btn btn-primary" style="margin-left: 15px;">Decrypt</button>
                                     </form>
                                 </div>
                                 <div class="form">
@@ -102,9 +153,12 @@
                                             <input type="text" name="key" placeholder="Enter key" class="form-control">
                                         </div>
                                         <input hidden value="<%= result.body %>" name="message">
-                                        <button type="submit" class="btn btn-primary">Verify</button>
+                                        <button type="submit" class="btn btn-primary" style="margin-left: 15px;">Verify</button>
                                     </form>
                                 </div>
+                                <% if (result.attachment != '') { %>
+                                    <button class="btn btn-primary" onclick="document.getElementById('download').click()" style="float: right; margin-right: 15px;">Download Attachment</button>
+                                <% } %>
                             </div>
                         </div>
                     </div>
@@ -112,5 +166,6 @@
             </div>
         </div>
     </div>
+</div>
 </body>
 </html>

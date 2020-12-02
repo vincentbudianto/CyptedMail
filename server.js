@@ -123,7 +123,9 @@ app.post('/decrypt', (req, res) => {
     .then(decrypted => {
         console.log("DECRYPTED: ")
         console.log(decrypted)
-        res.send(decrypted)
+        alert(decrypted)
+        // res.send(decrypted)
+        res.redirect('/inbox')
     })
 })
 
@@ -135,12 +137,12 @@ app.post('/verify', (req, res) => {
     let ecdsa_code = new ecdsa.ECDSA(a, b, p, g, n);
 
     try{
-        text = message.split("-----BEGIN PGP SIGNATURE-----");
+        text = message.split("<br>-----BEGIN PGP SIGNATURE-----<br>");
         initial_message = text[0];
         console.log(`message: ${initial_message}`)
 
         //Parse message
-        signature = text[1].split("-----END PGP SIGNATURE-----");
+        signature = text[1].split("<br>-----END PGP SIGNATURE-----");
         sign = signature[0]
         console.log(`signature: ${sign}`)
 
@@ -213,7 +215,7 @@ app.get('/inbox', (req, res) => {
                             // console.log('result :');
                             // console.log(result);
                             res.render('index', {
-                                inboxType: 'inbox',
+                                inboxType: 'INBOX',
                                 result: result,
                                 app_url: process.env.APP_URL,
                                 token: req.session.token,
@@ -291,7 +293,7 @@ app.get('/sent', (req, res) => {
                             // console.log('result :');
                             // console.log(result);
                             res.render('index', {
-                                inboxType: 'sent',
+                                inboxType: 'SENT',
                                 result: result,
                                 app_url: process.env.APP_URL,
                                 token: req.session.token,
@@ -369,7 +371,7 @@ app.get('/spam', (req, res) => {
                             // console.log('result :');
                             // console.log(result);
                             res.render('index', {
-                                inboxType: 'spam',
+                                inboxType: 'SPAM',
                                 result: result,
                                 app_url: process.env.APP_URL,
                                 token: req.session.token,
@@ -445,7 +447,7 @@ app.get('/trash', (req, res) => {
                             result.sort((a, b) => b.date - a.date)
 
                             res.render('index', {
-                                inboxType: 'trash',
+                                inboxType: 'TRASH',
                                 result: result,
                                 app_url: process.env.APP_URL,
                                 token: req.session.token,
@@ -464,7 +466,7 @@ app.get('/trash', (req, res) => {
     }
 })
 
-app.get('/message/:id', (req, res) => {
+app.get('/message/:id', async (req, res) => {
     if (req.session.token !== undefined) {
         const gmail = google.gmail({version: 'v1', auth: oAuth2Client});
         gmail.users.messages.get({
@@ -474,13 +476,15 @@ app.get('/message/:id', (req, res) => {
             if (err) console.log('The API returned an error: ' + err);
             // console.log(message.data.payload.headers);
 
+            let attachment = ''
             if (message.data.payload.parts !== undefined) {
+                console.log(message.data.payload.parts[0])
+                console.log(typeof(message.data.payload.parts[0]))
                 body = Buffer.from(message.data.payload.parts[0].body.data, 'base64');
                 // console.log('Message :', body.toString("utf-8"));
-                let attachment = ''
 
                 if (message.data.payload.parts[1].body.attachmentId !== undefined) {
-                    // console.log('Attachment :', message.data.payload.parts[1]);
+                    // console.log('Attachment :', message.data.payload.parts[1].body.attachmentId);
                     // console.log('Type :', message.data.payload.parts[1].mimeType);
                     // console.log('Filename :', message.data.payload.parts[1].filename);
                     attachmentId = message.data.payload.parts[1].body.attachmentId;
@@ -491,16 +495,16 @@ app.get('/message/:id', (req, res) => {
                         'messageId': req.params.id,
                         'id': attachmentId
                     })
-                    .then((data) => {
+                    .then((response) => {
                         attachment = {
                             'attachmentId': attachmentId,
                             'filename': filename,
                             'type': type,
-                            'data': data
+                            'data': response.data.data
                         }
                     })
                     .catch((err) => {
-                        console.log('uwu');
+                        console.log(err);
                     })
                 } else {
                     // console.log('No attachment.')
@@ -513,7 +517,7 @@ app.get('/message/:id', (req, res) => {
             // console.log('message 2 :', body)
             // console.log('message 3 :', body.toString('utf-8'))
             // console.log('message 4 :', body.toString('ascii'))
-            console.log(attachment)
+            // console.log(attachment.data)
 
             let result = {
                 'id': message.data.id,
