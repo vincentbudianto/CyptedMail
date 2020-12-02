@@ -187,14 +187,14 @@ app.get('/inbox', (req, res) => {
                             if (message.data.payload.parts[1].body.attachmentId !== undefined) {
                                 // console.log('Attachment :', message.data.payload.parts[1]);
                                 attachmentId = message.data.payload.parts[1].body.attachmentId
-                                console.log('Attachment found');
+                                // console.log('Attachment found');
                             } else {
                                 attachmentId = ''
-                                console.log('No attachment.')
+                                // console.log('No attachment.')
                             }
                         } else {
                             attachmentId = ''
-                            console.log('No attachment.')
+                            // console.log('No attachment.')
                         }
 
                         let data = {
@@ -265,14 +265,14 @@ app.get('/sent', (req, res) => {
                             if (message.data.payload.parts[1].body.attachmentId !== undefined) {
                                 // console.log('Attachment :', message.data.payload.parts[1]);
                                 attachmentId = message.data.payload.parts[1].body.attachmentId
-                                console.log('Attachment found');
+                                // console.log('Attachment found');
                             } else {
                                 attachmentId = ''
-                                console.log('No attachment.')
+                                // console.log('No attachment.')
                             }
                         } else {
                             attachmentId = ''
-                            console.log('No attachment.')
+                            // console.log('No attachment.')
                         }
 
                         let data = {
@@ -343,14 +343,14 @@ app.get('/spam', (req, res) => {
                             if (message.data.payload.parts[1].body.attachmentId !== undefined) {
                                 // console.log('Attachment :', message.data.payload.parts[1]);
                                 attachmentId = message.data.payload.parts[1].body.attachmentId
-                                console.log('Attachment found');
+                                // console.log('Attachment found');
                             } else {
                                 attachmentId = ''
-                                console.log('No attachment.')
+                                // console.log('No attachment.')
                             }
                         } else {
                             attachmentId = ''
-                            console.log('No attachment.')
+                            // console.log('No attachment.')
                         }
 
                         let data = {
@@ -421,14 +421,14 @@ app.get('/trash', (req, res) => {
                             if (message.data.payload.parts[1].body.attachmentId !== undefined) {
                                 // console.log('Attachment :', message.data.payload.parts[1]);
                                 attachmentId = message.data.payload.parts[1].body.attachmentId
-                                console.log('Attachment found');
+                                // console.log('Attachment found');
                             } else {
                                 attachmentId = ''
-                                console.log('No attachment.')
+                                // console.log('No attachment.')
                             }
                         } else {
                             attachmentId = ''
-                            console.log('No attachment.')
+                            // console.log('No attachment.')
                         }
 
                         let data = {
@@ -490,16 +490,20 @@ app.get('/message/:id', (req, res) => {
                         'userId': 'me',
                         'messageId': req.params.id,
                         'id': attachmentId
-                    }).then(data => {
+                    })
+                    .then((data) => {
                         attachment = {
                             'attachmentId': attachmentId,
                             'filename': filename,
                             'type': type,
                             'data': data
                         }
-                    });
+                    })
+                    .catch((err) => {
+                        console.log('uwu');
+                    })
                 } else {
-                    console.log('No attachment.')
+                    // console.log('No attachment.')
                 }
             } else {
                 body = Buffer.from(message.data.payload.body.data, 'base64');

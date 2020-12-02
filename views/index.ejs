@@ -294,15 +294,15 @@
 
 let gridData = []
 "<% result.forEach((res) => { %>"
-gridData.push(
-    {
-        "id": "<%= res.id %>",
-        "sender" : "<%= res.from %>",
-        "message": "<%= res.subject %>",
-        "attach": " <% res.attachmentId == undefined ? '' : '<span class=\"fa fa-paperclip\"></span>'",
-        "date": "<%= res.date %>"
-    }
-)
+    gridData.push(
+        {
+            "id": "<%= res.id %>",
+            "sender" : "<%= res.from %>",
+            "message": "<%= res.subject %>",
+            "attach": "<%- res.attachmentId == '' ? '' : '<span class=\'fa fa-paperclip\'></span>' %>",
+            "date": "<%= res.date %>"
+        }
+    )
 "<% }) %>"
 
 $(function () {
