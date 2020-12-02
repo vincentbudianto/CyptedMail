@@ -17,6 +17,7 @@ module.exports = {
             let pyshell = new ps.PythonShell('runner.py', options)
 
             pyshell.on('message', function(message) {
+                // console.log('Message', message)
                 result = message;
             });
           
@@ -44,11 +45,14 @@ module.exports = {
         }
 
         return new Promise((resolve, reject) => {
-            let result
+            let result = ''
             let pyshell = new ps.PythonShell('runner.py', options)
 
             pyshell.on('message', function(message) {
-                result = message;
+                if (result != '') {
+                    result += '\n'
+                }
+                result += message
             });
           
             pyshell.on('stderr', function(stderr) {

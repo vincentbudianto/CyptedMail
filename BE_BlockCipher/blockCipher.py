@@ -14,19 +14,19 @@ class BlockCipher:
         else:
             if (is_encrypt):
                 self.initial = Helper.convertStringToBinary64(input_name)
-                print('INPUT')
-                print(self.initial)
+                # print('INPUT')
+                # print(self.initial)
             else:
-                print('INPUT')
-                print(input_name)
+                # print('INPUT')
+                # print(input_name)
                 self.initial = input_name
     
     def write_result(self, file_name = None, is_encrypt = True, is_file = False):
         if (is_file):
             Helper.convertBinary64ToFile(self.result, file_name)
         else:
-            print('RESULT')
-            print(self.result)
+            # print('RESULT')
+            # print(self.result)
             if (is_encrypt):
                 return str(self.result)
             else:
