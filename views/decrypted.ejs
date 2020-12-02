@@ -102,6 +102,19 @@
                                             style="border: none; width: 100%;" readonly
                                             rows="9"><%= verResult %></textarea>
                                     </div>
+                                    <div class="form">
+                                        <form method="POST" action="/decryptnverify">
+                                            <div class="col-md-3">
+                                                <p>Sign Key: </p>
+                                            </div>
+
+                                            <div class="col-md-9">
+                                                <input type="text" name="verKey" placeholder="Enter key" class="form-control" style="margin-bottom: 7.5px;">
+                                            </div>
+                                            <input hidden value="<%= verResult %>" name="message">
+                                            <button type="submit" class="btn btn-primary" style="margin-left: 15px;">Dekripsi & Verify</button>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
                         </div>
