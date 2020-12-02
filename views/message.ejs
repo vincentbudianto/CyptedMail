@@ -133,23 +133,44 @@
                                         </div>
 
                                         <div class="col-md-9">
-                                            <input type="text" name="key" placeholder="Enter key" class="form-control" maxlength="8" style="margin-bottom: 7.5px;">
+                                            <input required type="text" name="key" placeholder="Enter key" class="form-control" maxlength="8" style="margin-bottom: 7.5px;">
                                         </div>
                                         <input hidden value="<%= result.body %>" name="message">
                                         <button type="submit" class="btn btn-primary" style="margin-left: 15px;">Decrypt</button>
                                     </form>
                                 </div>
-                                <div class="form">
+                                <div class="form" style="margin-bottom: 15px;">
                                     <form method="POST" action="/verify">
                                         <div class="col-md-3">
                                             <p>Sign Key: </p>
                                         </div>
 
                                         <div class="col-md-9">
-                                            <input type="text" name="key" placeholder="Enter key" class="form-control" style="margin-bottom: 7.5px;">
+                                            <input required type="text" name="key" placeholder="Enter key" class="form-control" style="margin-bottom: 7.5px;">
                                         </div>
                                         <input hidden value="<%= result.body %>" name="message">
                                         <button type="submit" class="btn btn-primary" style="margin-left: 15px;">Verify</button>
+                                    </form>
+                                </div>
+                                <div class="form">
+                                    <form method="POST" action="/decryptnverify">
+                                        <div class="col-md-3">
+                                            <p>BlockCipher Key: </p>
+                                        </div>
+
+                                        <div class="col-md-9">
+                                            <input required type="text" name="decKey" placeholder="Enter key" class="form-control" maxlength="8" style="margin-bottom: 7.5px;">
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <p>Sign Key: </p>
+                                        </div>
+
+                                        <div class="col-md-9">
+                                            <input required type="text" name="verKey" placeholder="Enter key" class="form-control" style="margin-bottom: 7.5px;">
+                                        </div>
+                                        <input hidden value="<%= result.body %>" name="message">
+                                        <button type="submit" class="btn btn-primary" style="margin-left: 15px;">Dekripsi & Verify</button>
                                     </form>
                                 </div>
                                 <% if (result.attachment != '') { %>

@@ -137,6 +137,64 @@ app.post('/decrypt', (req, res) => {
     })
 })
 
+app.post('/decryptnverify', (req, res) => {
+    let dkey = req.body.decKey
+    let dmessage = req.body.message
+    // Decrypt message
+
+    blockCipher.decrypt(dmessage, dkey)
+    .then(decrypted => {
+        let key = req.body.verkey
+        let message = decrypted
+        let ecdsa_code = new ecdsa.ECDSA(a, b, p, g, n);
+
+        try{
+            text = message.split("-----BEGIN_PGP_SIGNATURE-----");
+            initial_message = text[0];
+            console.log(`message: ${initial_message}`)
+
+            //Parse message
+            console.log('text[1]', text[1])
+            signature = text[1].split("-----END_PGP_SIGNATURE-----");
+            sign = signature[0]
+            console.log(`signature: ${sign}`)
+
+            //Verify Message
+            ecdsa_code.setPublicKeyHex(key)
+            verify = ecdsa_code.verify(initial_message, sign, ecdsa_code.publicKeyHex, hexedKey = true, hexedSign = true)
+            console.log(verify)
+            // alert(decrypted)
+            // res.send(decrypted)
+            // res.redirect('/inbox')
+            let verResult = (verify === true ? "Terverifikasi: " : "Tidak Terverifikasi: ")
+            verResult += "\n" + message
+            res.render('verify', {
+                verResult: verResult
+            })
+            // res.send(verify)
+        }catch(err){
+            console.log(err)
+            res.render('verify', {
+                verResult: "Terdapat masalah dalam verifikasi"
+            })
+        }
+
+        console.log("DECRYPTED: ")
+        console.log(decrypted)
+        // alert(decrypted)
+        // res.send(decrypted)
+        // res.redirect('/inbox')
+        // res.render('verify', {
+        //     verResult: decrypted
+        // })
+    })
+    .catch((err) => {
+        res.render('verify', {
+            verResult: "Terdapat kesalahan dalam dekripsi"
+        })
+    })
+})
+
 
 app.post('/verify', (req, res) => {
     console.log(req.body)
@@ -600,12 +658,12 @@ app.post('/new-email', async (req, res) => {
             res.redirect('/');
         }
     }
-
+    console.log(`Message tahap ini : ${message}`)
     if (data.encrypted) {
         let Enckey = data.newCipherKey
         // Encryption
         if (Enckey) {
-            await blockCipher.encrypt(data.newMessage, Enckey)
+            await blockCipher.encrypt(message, Enckey)
             .then(encrypted => {
                 message = encrypted
             })
