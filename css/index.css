@@ -108,10 +108,17 @@
     transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
 }
 
+a:hover {
+    text-decoration: none;
+}
+
 textarea {
     resize: none;
     outline: none;
-    overflow: hidden;
+}
+
+textarea::-webkit-scrollbar {
+    display: none;
 }
 
 #brand {
@@ -137,10 +144,10 @@ textarea {
 	 width: 90px;
 	 height: 35px;
 	 background-color: #f44242;
-	 border-radius: 2px;
+	 border-radius: 25px;
      box-shadow: 0 3px 4px 0 rgba(0, 0, 0, .25);
-     align-items: center;
      display: inline-flex;
+     margin: .67em 0;
 }
 .google-btn .google-icon-wrapper {
 	 position: absolute;
@@ -179,9 +186,17 @@ textarea {
 .google-btn:active {
 	 background: #1669f2;
 }
-.google-btn2:hover {
+.google-btn-out:hover {
 	 box-shadow: 0 0 6px #f44242;
 }
-.google-btn2:active {
+.google-btn-out:active {
 	 background: #f21616;
+}
+
+@media screen and (min-width: 600px) {
+    .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
 }

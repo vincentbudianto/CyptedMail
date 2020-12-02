@@ -123,9 +123,12 @@ app.post('/decrypt', (req, res) => {
     .then(decrypted => {
         console.log("DECRYPTED: ")
         console.log(decrypted)
-        alert(decrypted)
+        // alert(decrypted)
         // res.send(decrypted)
-        res.redirect('/inbox')
+        // res.redirect('/inbox')
+        res.render('verify', {
+            verResult: decrypted
+        })
     })
 })
 
@@ -137,19 +140,27 @@ app.post('/verify', (req, res) => {
     let ecdsa_code = new ecdsa.ECDSA(a, b, p, g, n);
 
     try{
-        text = message.split("<br>-----BEGIN PGP SIGNATURE-----<br>");
+        text = message.split("-----BEGIN_PGP_SIGNATURE-----");
         initial_message = text[0];
         console.log(`message: ${initial_message}`)
 
         //Parse message
-        signature = text[1].split("<br>-----END PGP SIGNATURE-----");
+        console.log('text[1]', text[1])
+        signature = text[1].split("-----END_PGP_SIGNATURE-----");
         sign = signature[0]
         console.log(`signature: ${sign}`)
 
         //Verify Message
         ecdsa_code.setPublicKeyHex(key)
         verify = ecdsa_code.verify(initial_message, sign, ecdsa_code.publicKeyHex, hexedKey = true, hexedSign = true)
-        res.send(verify)
+        console.log(verify)
+        // alert(decrypted)
+        // res.send(decrypted)
+        // res.redirect('/inbox')
+        res.render('verify', {
+            verResult: verify
+        })
+        // res.send(verify)
     }catch(err){
         console.log(err)
         res.send(false)
@@ -577,7 +588,7 @@ app.post('/new-email', async (req, res) => {
 
             signature = ecdsa_code.sign(message, ecdsa_code.privateKeyHex, hexedKey = true, hexedOutput = true);
 
-            message = message + "<br>-----BEGIN PGP SIGNATURE-----<br>" +  signature + "<br>-----END PGP SIGNATURE-----";
+            message = message + "\n-----BEGIN_PGP_SIGNATURE-----\n" +  signature + "\n-----END_PGP_SIGNATURE-----";
         } else {
             res.redirect('/');
         }
@@ -602,7 +613,6 @@ app.post('/new-email', async (req, res) => {
 })
 
 function sendEmail(subj, email, text, files, auth) {
-    // console.log(files)
     const gmail = google.gmail({version: 'v1', auth: oAuth2Client});
 
     const subject = subj;
@@ -655,15 +665,10 @@ function sendEmail(subj, email, text, files, auth) {
             raw: encodedMessage,
         },
     }, (err, res) => {
-        if (err) return console.log('The API returned an error: ' + err);
-        // const messages = res.data.messages;
-        // if (messages.length) {
-        //   console.log('Messages:');
-        //   messages.forEach((message) => {
-        //     console.log(`- ${message.id} | ${message.threadId}`);
-        //   });
-        // } else {
-        console.log('Email sent');
-      // }
+        if (err) {
+            return console.log('The API returned an error: ' + err);
+        } else {
+            console.log('Email sent');
+        }
     });
 }
