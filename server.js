@@ -130,6 +130,11 @@ app.post('/decrypt', (req, res) => {
             verResult: decrypted
         })
     })
+    .catch((err) => {
+        res.render('verify', {
+            verResult: "Terdapat kesalahan"
+        })
+    })
 })
 
 
@@ -158,12 +163,14 @@ app.post('/verify', (req, res) => {
         // res.send(decrypted)
         // res.redirect('/inbox')
         res.render('verify', {
-            verResult: verify
+            verResult: (verify === true ? "Terverifikasi" : "Tidak Terverifikasi")
         })
         // res.send(verify)
     }catch(err){
         console.log(err)
-        res.send(false)
+        res.render('verify', {
+            verResult: "Terdapat masalah"
+        })
     }
 })
 
