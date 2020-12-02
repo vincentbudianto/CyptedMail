@@ -19,11 +19,11 @@ module.exports = {
             pyshell.on('message', function(message) {
                 result = message;
             });
-          
+
             pyshell.on('stderr', function(stderr) {
                 console.log(stderr);
             });
-            
+
             pyshell.end(function(err, code, signal) {
                 if (err) {
                     reject(err);
@@ -50,11 +50,11 @@ module.exports = {
             pyshell.on('message', function(message) {
                 result = message;
             });
-          
+
             pyshell.on('stderr', function(stderr) {
                 console.log(stderr);
             });
-            
+
             pyshell.end(function(err, code, signal) {
                 if (err) {
                     reject(err);

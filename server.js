@@ -183,11 +183,26 @@ app.get('/inbox', (req, res) => {
                         if (err) console.log('The API 2 returned an error: ' + err);
                         // console.log(message.data.payload.headers);
 
+                        if (message.data.payload.parts !== undefined) {
+                            if (message.data.payload.parts[1].body.attachmentId !== undefined) {
+                                // console.log('Attachment :', message.data.payload.parts[1]);
+                                attachmentId = message.data.payload.parts[1].body.attachmentId
+                                console.log('Attachment found');
+                            } else {
+                                attachmentId = ''
+                                console.log('No attachment.')
+                            }
+                        } else {
+                            attachmentId = ''
+                            console.log('No attachment.')
+                        }
+
                         let data = {
                             'id': message.data.id,
                             'from': message.data.payload.headers.find(x => x.name === "From").value,
                             'subject': message.data.payload.headers.find(x => x.name === "Subject").value.replace(/[^a-zA-Z0-9:']/g, " "),
-                            'date': new Date(Number(message.data.internalDate))
+                            'date': new Date(Number(message.data.internalDate)),
+                            'attachmentId': attachmentId
                         };
 
                         result.push(data);
@@ -246,11 +261,26 @@ app.get('/sent', (req, res) => {
                         if (err) console.log('The API 2 returned an error: ' + err);
                         // console.log(message.data.payload.headers);
 
+                        if (message.data.payload.parts !== undefined) {
+                            if (message.data.payload.parts[1].body.attachmentId !== undefined) {
+                                // console.log('Attachment :', message.data.payload.parts[1]);
+                                attachmentId = message.data.payload.parts[1].body.attachmentId
+                                console.log('Attachment found');
+                            } else {
+                                attachmentId = ''
+                                console.log('No attachment.')
+                            }
+                        } else {
+                            attachmentId = ''
+                            console.log('No attachment.')
+                        }
+
                         let data = {
                             'id': message.data.id,
-                            'from': message.data.payload.headers.find(x => x.name === "To").value,
+                            'from': message.data.payload.headers.find(x => x.name === "From").value,
                             'subject': message.data.payload.headers.find(x => x.name === "Subject").value.replace(/[^a-zA-Z0-9:']/g, " "),
-                            'date': new Date(Number(message.data.internalDate))
+                            'date': new Date(Number(message.data.internalDate)),
+                            'attachmentId': attachmentId
                         };
 
                         result.push(data);
@@ -309,11 +339,26 @@ app.get('/spam', (req, res) => {
                         if (err) console.log('The API 2 returned an error: ' + err);
                         // console.log(message.data.payload.headers);
 
+                        if (message.data.payload.parts !== undefined) {
+                            if (message.data.payload.parts[1].body.attachmentId !== undefined) {
+                                // console.log('Attachment :', message.data.payload.parts[1]);
+                                attachmentId = message.data.payload.parts[1].body.attachmentId
+                                console.log('Attachment found');
+                            } else {
+                                attachmentId = ''
+                                console.log('No attachment.')
+                            }
+                        } else {
+                            attachmentId = ''
+                            console.log('No attachment.')
+                        }
+
                         let data = {
                             'id': message.data.id,
                             'from': message.data.payload.headers.find(x => x.name === "From").value,
                             'subject': message.data.payload.headers.find(x => x.name === "Subject").value.replace(/[^a-zA-Z0-9:']/g, " "),
-                            'date': new Date(Number(message.data.internalDate))
+                            'date': new Date(Number(message.data.internalDate)),
+                            'attachmentId': attachmentId
                         };
 
                         result.push(data);
@@ -372,20 +417,33 @@ app.get('/trash', (req, res) => {
                         if (err) console.log('The API 2 returned an error: ' + err);
                         // console.log(message.data.payload.headers);
 
+                        if (message.data.payload.parts !== undefined) {
+                            if (message.data.payload.parts[1].body.attachmentId !== undefined) {
+                                // console.log('Attachment :', message.data.payload.parts[1]);
+                                attachmentId = message.data.payload.parts[1].body.attachmentId
+                                console.log('Attachment found');
+                            } else {
+                                attachmentId = ''
+                                console.log('No attachment.')
+                            }
+                        } else {
+                            attachmentId = ''
+                            console.log('No attachment.')
+                        }
+
                         let data = {
                             'id': message.data.id,
                             'from': message.data.payload.headers.find(x => x.name === "From").value,
                             'subject': message.data.payload.headers.find(x => x.name === "Subject").value.replace(/[^a-zA-Z0-9:']/g, " "),
-                            'date': new Date(Number(message.data.internalDate))
+                            'date': new Date(Number(message.data.internalDate)),
+                            'attachmentId': attachmentId
                         };
 
                         result.push(data);
 
                         if (result.length == messages.length) {
                             result.sort((a, b) => b.date - a.date)
-                            // console.log('------------------------');
-                            // console.log('result :');
-                            // console.log(result);
+
                             res.render('index', {
                                 inboxType: 'trash',
                                 result: result,
@@ -412,20 +470,46 @@ app.get('/message/:id', (req, res) => {
         gmail.users.messages.get({
             'userId': 'me',
             'id': req.params.id
-        }, (err, message) => {
+        }, async (err, message) => {
             if (err) console.log('The API returned an error: ' + err);
             // console.log(message.data.payload.headers);
-            body = Buffer.from(message.data.payload.parts[0].body.data, 'base64');
-            // console.log('Message :', body.toString("utf-8"));
 
-            if (message.data.payload.parts[1].body.attachmentId !== undefined) {
-                // console.log('Attachment :', message.data.payload.parts[1]);
-                attachmentId = message.data.payload.parts[1].body.attachmentId
-                console.log('Attachment found');
+            if (message.data.payload.parts !== undefined) {
+                body = Buffer.from(message.data.payload.parts[0].body.data, 'base64');
+                // console.log('Message :', body.toString("utf-8"));
+                let attachment = ''
+
+                if (message.data.payload.parts[1].body.attachmentId !== undefined) {
+                    // console.log('Attachment :', message.data.payload.parts[1]);
+                    // console.log('Type :', message.data.payload.parts[1].mimeType);
+                    // console.log('Filename :', message.data.payload.parts[1].filename);
+                    attachmentId = message.data.payload.parts[1].body.attachmentId;
+                    type = message.data.payload.parts[1].mimeType;
+                    filename = message.data.payload.parts[1].filename;
+                    await gmail.users.messages.attachments.get({
+                        'userId': 'me',
+                        'messageId': req.params.id,
+                        'id': attachmentId
+                    }).then(data => {
+                        attachment = {
+                            'attachmentId': attachmentId,
+                            'filename': filename,
+                            'type': type,
+                            'data': data
+                        }
+                    });
+                } else {
+                    console.log('No attachment.')
+                }
             } else {
-                attachmentId = ''
-                console.log('No attachment.')
+                body = Buffer.from(message.data.payload.body.data, 'base64');
             }
+
+            // console.log('message 1 :', message.data.payload.parts[0].body.data)
+            // console.log('message 2 :', body)
+            // console.log('message 3 :', body.toString('utf-8'))
+            // console.log('message 4 :', body.toString('ascii'))
+            console.log(attachment)
 
             let result = {
                 'id': message.data.id,
@@ -434,12 +518,9 @@ app.get('/message/:id', (req, res) => {
                 'subject': message.data.payload.headers.find(x => x.name === "Subject").value.replace(/[^a-zA-Z0-9:']/g, " "),
                 'body': body.toString("utf-8"),
                 'date': new Date(Number(message.data.internalDate)),
-                'attachmentId': attachmentId
+                'attachment': attachment
             };
 
-            // console.log('------------------------');
-            // console.log('result :');
-            // console.log(result);
             res.render('message', {
                 result: result,
                 app_url: process.env.APP_URL,

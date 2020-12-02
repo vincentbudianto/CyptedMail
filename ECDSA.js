@@ -168,7 +168,7 @@ module.exports = {
             if (!hexedOutput) {
                 return [r, s]
             } else {
-                return (r.toString(16) + ' ' + s.toString(16))
+                return (r.toString(16) + '|' + s.toString(16))
             }
         }
 
@@ -184,7 +184,7 @@ module.exports = {
                 r = signature[0]
                 s = signature[1]
             } else {
-                let splitted = signature.split(" ")
+                let splitted = signature.split("|")
                 console.log('Signature:', signature)
                 console.log('Splitted signature public key:', splitted)
                 r = BigInt('0x' + splitted[0])

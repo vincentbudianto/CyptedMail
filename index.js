@@ -114,7 +114,7 @@ function getInbox(auth) {
   gmail.users.messages.list({
     userId: 'me',
     labelIds: 'INBOX',
-    maxResults: 3
+    maxResults: 1
   }, (err, res) => {
     if (err) return console.log('The API returned an error: ' + err);
     const messages = res.data.messages;
@@ -123,7 +123,8 @@ function getInbox(auth) {
       messages.forEach((message) => {
         gmail.users.messages.get({
           'userId': 'me',
-          'id': message.id
+          // 'id': message.id
+          'id': '175abd706b1db428'
         }, (err, res) => {
           if (err) return console.log('The API returned an error: ' + err);
           let result = res.data;
@@ -131,15 +132,17 @@ function getInbox(auth) {
           // console.log('Snippet :', result.snippet);
           // console.log('Headers :', result.payload.headers);
           console.log('Header :', result.payload.headers.find(x => x.name === "Subject").value.replace(/[^a-zA-Z0-9:']/g, " "));
-          data = Buffer.from(result.payload.parts[0].body.data, 'base64');
-          console.log('Message :', data.toString("utf-8"));
+          // data = Buffer.from(result.payload.parts[0].body.data, 'base64');
+          // console.log('Message :', data.toString("utf-8"));
           // console.log('Message :', result.payload.parts[0].body.data);
-          if (result.payload.parts[1].body.attachmentId !== undefined) {
-            console.log('Attachment :', result.payload.parts[1].body);
-            // console.log('Attachment :', result.payload.parts[1]);
-          } else {
-            console.log('No attachment.')
-          }
+          // console.log('Payload :', result.payload);
+          // if (result.payload.parts[1].body.attachmentId !== undefined) {
+          //   console.log('Attachment :', result.payload.parts[1].body.attachmentId);
+          //   console.log('Type :', result.payload.parts[1].mimeType);
+          //   console.log('Filename :', result.payload.parts[1].filename);
+          // } else {
+          //   console.log('No attachment.')
+          // }
           // console.log('Message :', result.payload.parts[1].body.data);
         });
       });
