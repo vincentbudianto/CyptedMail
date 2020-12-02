@@ -20,11 +20,11 @@ module.exports = {
                 // console.log('Message', message)
                 result = message;
             });
-          
+
             pyshell.on('stderr', function(stderr) {
                 console.log(stderr);
             });
-            
+
             pyshell.end(function(err, code, signal) {
                 if (err) {
                     reject(err);
@@ -38,7 +38,7 @@ module.exports = {
         let options = {
             mode: 'text',
             encoding: 'utf8',
-            pythonPath: 'D:/Installed Programs/Python/python',
+            pythonPath: process.env.PYTHON_PATH,
             pythonOptions: ['-u'],
             scriptPath: './BE_BlockCipher/',
             args: ['decrypt', cipherText, key]
@@ -54,11 +54,11 @@ module.exports = {
                 }
                 result += message
             });
-          
+
             pyshell.on('stderr', function(stderr) {
                 console.log(stderr);
             });
-            
+
             pyshell.end(function(err, code, signal) {
                 if (err) {
                     reject(err);

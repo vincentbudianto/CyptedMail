@@ -96,6 +96,13 @@ module.exports = {
             let splittedPublic = publicKeyHex.split(" ")
             this.publicKey = [BigInt('0x' + splittedPublic[0]), BigInt('0x' + splittedPublic[1])]
         }
+        
+        setKeyHex(privateKeyHex) {
+            this.privateKeyHex = privateKeyHex
+            this.privateKey = BigInt('0x' + privateKeyHex)
+            this.publicKey = this.curve.multiplyGraphPoint(this.curve.base, this.privateKey)
+            this.publicKeyHex = this.publicKey[0].toString(16) + ' ' + this.publicKey[1].toString(16)
+        }
 
         initiateK(privateKey) {
             let binCount = this.curve.binSize - binReduction
@@ -161,7 +168,7 @@ module.exports = {
             if (!hexedOutput) {
                 return [r, s]
             } else {
-                return (r.toString(16) + ' ' + s.toString(16))
+                return (r.toString(16) + '|' + s.toString(16))
             }
         }
 
@@ -177,7 +184,9 @@ module.exports = {
                 r = signature[0]
                 s = signature[1]
             } else {
-                let splitted = signature.split(" ")
+                let splitted = signature.split("|")
+                console.log('Signature:', signature)
+                console.log('Splitted signature public key:', splitted)
                 r = BigInt('0x' + splitted[0])
                 s = BigInt('0x' + splitted[1])
             }

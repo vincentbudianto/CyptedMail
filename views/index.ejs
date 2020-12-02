@@ -17,8 +17,12 @@
 <div class="container">
 
 <div class="page-header">
-    <h1>E-mail Client <small>A responsive e-mail client layout</small></h1>
-    <a href="#" onclick="signOut();">Sign out</a>
+    <h1>OksidianToughly <small>A crypted e-mail client</small></h1>
+    <a href="#" onclick="signOut();" style="width: fit-content;">
+        <div class="google-btn-out">
+            <p class="btn-text"><b>Sign out</b></p>
+        </div>
+    </a>
 </div>
 <script src="https://apis.google.com/js/platform.js?onload=onLoad" async defer></script>
 
@@ -74,14 +78,14 @@
             <div class="row">
                 <div class="col-md-2" id="column-resize">
                     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                        <button id="btn_email" class="btn btn-danger" data-toggle="modal" data-target="#myModal">
-                            New E-mail
-                        </button>
-                        <div id="loltreeview">
-                            <button onclick="inbox()">Inbox</button>
-                            <button onclick="sent()">Sent</button>
-                            <button onclick="spam()">Spam</button>
-                            <button onclick="trash()">Trash</button>
+                        <div id="loltreeview" style="display: grid;">
+                            <button id="btn_email" class="btn btn-danger" data-toggle="modal" data-target="#myModal" style="margin-bottom: 10px;">
+                                New E-mail
+                            </button>
+                            <button class="btn btn-block" onclick="inbox()">Inbox</button>
+                            <button class="btn btn-block" onclick="sent()">Sent</button>
+                            <button class="btn btn-block" onclick="spam()">Spam</button>
+                            <button class="btn btn-block" onclick="trash()">Trash</button>
                         </div>
                     </div>
                     <!-- /.navbar-collapse -->
@@ -92,62 +96,11 @@
                             <div class="panel-heading">
                                 <div class="row">
                                     <div class="col-xs-4 col-md-4">
-                                        <p id="inbox_parag">INBOX</p>
-                                    </div>
-                                    <div class="col-xs-8 col-md-8">
-                                        <div class="input-group">
-                                            <input type="text" name="" placeholder="Seach...." class="form-control">
-                                            <span class="input-group-btn">
-                                                <button class="btn btn-primary" type="button" tabindex="-1">
-                                                    <span class="fa fa-question fa-2x" area-hidden="true"></span>
-                                                </button>
-                                            </span>
-                                        </div>
+                                        <p id="inbox_parag"><%= inboxType %></p>
                                     </div>
                                 </div>
                             </div>
                             <div class="panel-body">
-                                <div class="row">
-                                    <div class="col-xs-9 col-md-10">
-                                        <div class="btn-group">
-                                            <a data-toggle="dropdown" href="#" class="btn btn-warning btn-md" aria-expanded="false">All
-                        <i class="fa fa-angle-down "></i>
-                                            </a>
-                                            <ul class="dropdown-menu">
-                                                <li><a href="#">None</a></li>
-                                                <li><a href="#">Read</a></li>
-                                                <li><a href="#">Unread</a></li>
-                                            </ul>
-                                            <a href="#" class="btn btn-warning">
-                                                <i class=" fa fa-refresh fa-lg"></i>
-                                            </a>
-                                        </div>
-                                        <div class="btn-group">
-                                            <a data-toggle="dropdown" href="#" class="btn btn-warning btn-md" aria-expanded="false">More
-                        <i class="fa fa-angle-down "></i>
-                                            </a>
-                                            <ul class="dropdown-menu">
-                                                <li><a href="#">Mark all as read</a></li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                    <div class="col-xs-3 col-md-2">
-
-                                        <div class="btn-group pull-right">
-                                            <a data-toggle="dropdown" href="#" class="btn btn-primary" aria-expanded="false">
-                                                <i class="fa fa-cog"></i>
-                                            </a>
-                                            <ul class="dropdown-menu">
-                                                <li><a href="#">Comfortable</a></li>
-                                                <li><a href="#">Cozy</a></li>
-                                                <li><a href="#">Compact</a></li>
-                                                <hr>
-                                                <li><a href="#">Configure inbox</a></li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                                <hr>
                                 <div id="grid"></div>
                             </div>
                         </div>
@@ -218,7 +171,7 @@
                                         <p>Cipher Key: </p>
                                     </div>
                                     <div class="col-md-9">
-                                        <input type="text" name="newCipherKey" class="form-control">
+                                        <input type="text" name="newCipherKey" class="form-control" maxlength="8">
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -239,10 +192,6 @@
                                 </div>
                             </div>
                             <div class="modal-footer">
-                                <!-- <button type="button" class="btn btn-primary pull-left" id="btn_file">
-                                    <span class="fa fa-paperclip fa-2x"></span>
-                                </button> -->
-
                                 <input name="attached_file" type="file" id="attached_file"/>
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                                 <button type="submit" class="btn btn-primary">Send</button>
@@ -298,14 +247,15 @@
 
 let gridData = []
 "<% result.forEach((res) => { %>"
-gridData.push(
-    {
-        "id": "<%= res.id %>",
-        "sender" : "<%= res.from %>",
-        "message": "<%= res.subject %>",
-        "date": "<%= res.date %>"
-    }
-)
+    gridData.push(
+        {
+            "id": "<%= res.id %>",
+            "sender" : "<%= res.from %>",
+            "message": "<%= res.subject %>",
+            "attach": "<%- res.attachmentId == '' ? '' : '<span class=\'fa fa-paperclip\'></span>' %>",
+            "date": "<%= res.date %>"
+        }
+    )
 "<% }) %>"
 
 $(function () {
@@ -360,10 +310,10 @@ $(function () {
         columns: [
             // { field: "check", title: "&nbsp;", width: "2em", attributes: { style: "text-align: center;" } },
             // { field: "icon", title: "&nbsp;", width: "2em", attributes: { style: "text-align: center;" } },
-            { field: "sender", title: "Sender", width: "10em" },
+            { field: "sender", title: "<%- inboxType === 'inbox' ? 'From' : (inboxType === 'sent' ? 'To' : 'From / To') %>", width: "10em" },
             { field: "message", title: "Subject", width: "17em" },
-            // { field: "attach", title: "&nbsp;", width: "2em", attributes: { style: "text-align: center;" } },
-            { field: "date", title: "Delivered", width: "6em" }
+            { field: "attach", title: "&nbsp;", width: "2em", attributes: { style: "text-align: center;" } },
+            { field: "date", title: "<%- inboxType === 'INBOX' ? 'Received' : (inboxType === 'SENT' ? 'Delivered' : 'Delivered / Received') %>", width: "6em" }
         ],
         events: {
             command: function (e) {

@@ -114,6 +114,124 @@ app.get('/logout', (req, res) => {
     })
 })
 
+app.post('/decrypt', (req, res) => {
+    let key = req.body.key
+    let message = req.body.message
+    // Decrypt message
+
+    blockCipher.decrypt(message, key)
+    .then(decrypted => {
+        console.log("DECRYPTED: ")
+        console.log(decrypted)
+        // alert(decrypted)
+        // res.send(decrypted)
+        // res.redirect('/inbox')
+        res.render('verify', {
+            verResult: decrypted
+        })
+    })
+    .catch((err) => {
+        res.render('verify', {
+            verResult: "Terdapat kesalahan"
+        })
+    })
+})
+
+app.post('/decryptnverify', (req, res) => {
+    let dkey = req.body.decKey
+    let dmessage = req.body.message
+    // Decrypt message
+
+    blockCipher.decrypt(dmessage, dkey)
+    .then(decrypted => {
+        let key = req.body.verkey
+        let message = decrypted
+        let ecdsa_code = new ecdsa.ECDSA(a, b, p, g, n);
+
+        try{
+            text = message.split("-----BEGIN_PGP_SIGNATURE-----");
+            initial_message = text[0];
+            console.log(`message: ${initial_message}`)
+
+            //Parse message
+            console.log('text[1]', text[1])
+            signature = text[1].split("-----END_PGP_SIGNATURE-----");
+            sign = signature[0]
+            console.log(`signature: ${sign}`)
+
+            //Verify Message
+            ecdsa_code.setPublicKeyHex(key)
+            verify = ecdsa_code.verify(initial_message, sign, ecdsa_code.publicKeyHex, hexedKey = true, hexedSign = true)
+            console.log(verify)
+            // alert(decrypted)
+            // res.send(decrypted)
+            // res.redirect('/inbox')
+            let verResult = (verify === true ? "Terverifikasi: " : "Tidak Terverifikasi: ")
+            verResult += "\n" + message
+            res.render('verify', {
+                verResult: verResult
+            })
+            // res.send(verify)
+        }catch(err){
+            console.log(err)
+            res.render('verify', {
+                verResult: "Terdapat masalah dalam verifikasi"
+            })
+        }
+
+        console.log("DECRYPTED: ")
+        console.log(decrypted)
+        // alert(decrypted)
+        // res.send(decrypted)
+        // res.redirect('/inbox')
+        // res.render('verify', {
+        //     verResult: decrypted
+        // })
+    })
+    .catch((err) => {
+        res.render('verify', {
+            verResult: "Terdapat kesalahan dalam dekripsi"
+        })
+    })
+})
+
+
+app.post('/verify', (req, res) => {
+    console.log(req.body)
+    let key = req.body.key
+    let message = req.body.message
+    let ecdsa_code = new ecdsa.ECDSA(a, b, p, g, n);
+
+    try{
+        text = message.split("-----BEGIN_PGP_SIGNATURE-----");
+        initial_message = text[0];
+        console.log(`message: ${initial_message}`)
+
+        //Parse message
+        console.log('text[1]', text[1])
+        signature = text[1].split("-----END_PGP_SIGNATURE-----");
+        sign = signature[0]
+        console.log(`signature: ${sign}`)
+
+        //Verify Message
+        ecdsa_code.setPublicKeyHex(key)
+        verify = ecdsa_code.verify(initial_message, sign, ecdsa_code.publicKeyHex, hexedKey = true, hexedSign = true)
+        console.log(verify)
+        // alert(decrypted)
+        // res.send(decrypted)
+        // res.redirect('/inbox')
+        res.render('verify', {
+            verResult: (verify === true ? "Terverifikasi" : "Tidak Terverifikasi")
+        })
+        // res.send(verify)
+    }catch(err){
+        console.log(err)
+        res.render('verify', {
+            verResult: "Terdapat masalah"
+        })
+    }
+})
+
 app.get('/inbox', (req, res) => {
     if (req.session.token !== undefined) {
         const gmail = google.gmail({version: 'v1', auth: oAuth2Client});
@@ -143,20 +261,37 @@ app.get('/inbox', (req, res) => {
                         if (err) console.log('The API 2 returned an error: ' + err);
                         // console.log(message.data.payload.headers);
 
+                        if (message.data.payload.parts !== undefined) {
+                            if (message.data.payload.parts[1].body.attachmentId !== undefined) {
+                                // console.log('Attachment :', message.data.payload.parts[1]);
+                                attachmentId = message.data.payload.parts[1].body.attachmentId
+                                // console.log('Attachment found');
+                            } else {
+                                attachmentId = ''
+                                // console.log('No attachment.')
+                            }
+                        } else {
+                            attachmentId = ''
+                            // console.log('No attachment.')
+                        }
+
                         let data = {
                             'id': message.data.id,
                             'from': message.data.payload.headers.find(x => x.name === "From").value,
                             'subject': message.data.payload.headers.find(x => x.name === "Subject").value.replace(/[^a-zA-Z0-9:']/g, " "),
-                            'date': new Date(Number(message.data.internalDate) / 1000)
+                            'date': new Date(Number(message.data.internalDate)),
+                            'attachmentId': attachmentId
                         };
 
                         result.push(data);
 
                         if (result.length == messages.length) {
+                            result.sort((a, b) => b.date - a.date)
                             // console.log('------------------------');
                             // console.log('result :');
                             // console.log(result);
                             res.render('index', {
+                                inboxType: 'INBOX',
                                 result: result,
                                 app_url: process.env.APP_URL,
                                 token: req.session.token,
@@ -204,20 +339,37 @@ app.get('/sent', (req, res) => {
                         if (err) console.log('The API 2 returned an error: ' + err);
                         // console.log(message.data.payload.headers);
 
+                        if (message.data.payload.parts !== undefined) {
+                            if (message.data.payload.parts[1].body.attachmentId !== undefined) {
+                                // console.log('Attachment :', message.data.payload.parts[1]);
+                                attachmentId = message.data.payload.parts[1].body.attachmentId
+                                // console.log('Attachment found');
+                            } else {
+                                attachmentId = ''
+                                // console.log('No attachment.')
+                            }
+                        } else {
+                            attachmentId = ''
+                            // console.log('No attachment.')
+                        }
+
                         let data = {
                             'id': message.data.id,
                             'from': message.data.payload.headers.find(x => x.name === "From").value,
                             'subject': message.data.payload.headers.find(x => x.name === "Subject").value.replace(/[^a-zA-Z0-9:']/g, " "),
-                            'date': new Date(Number(message.data.internalDate) / 1000)
+                            'date': new Date(Number(message.data.internalDate)),
+                            'attachmentId': attachmentId
                         };
 
                         result.push(data);
 
                         if (result.length == messages.length) {
+                            result.sort((a, b) => b.date - a.date)
                             // console.log('------------------------');
                             // console.log('result :');
                             // console.log(result);
                             res.render('index', {
+                                inboxType: 'SENT',
                                 result: result,
                                 app_url: process.env.APP_URL,
                                 token: req.session.token,
@@ -265,20 +417,37 @@ app.get('/spam', (req, res) => {
                         if (err) console.log('The API 2 returned an error: ' + err);
                         // console.log(message.data.payload.headers);
 
+                        if (message.data.payload.parts !== undefined) {
+                            if (message.data.payload.parts[1].body.attachmentId !== undefined) {
+                                // console.log('Attachment :', message.data.payload.parts[1]);
+                                attachmentId = message.data.payload.parts[1].body.attachmentId
+                                // console.log('Attachment found');
+                            } else {
+                                attachmentId = ''
+                                // console.log('No attachment.')
+                            }
+                        } else {
+                            attachmentId = ''
+                            // console.log('No attachment.')
+                        }
+
                         let data = {
                             'id': message.data.id,
                             'from': message.data.payload.headers.find(x => x.name === "From").value,
                             'subject': message.data.payload.headers.find(x => x.name === "Subject").value.replace(/[^a-zA-Z0-9:']/g, " "),
-                            'date': new Date(Number(message.data.internalDate) / 1000)
+                            'date': new Date(Number(message.data.internalDate)),
+                            'attachmentId': attachmentId
                         };
 
                         result.push(data);
 
                         if (result.length == messages.length) {
+                            result.sort((a, b) => b.date - a.date)
                             // console.log('------------------------');
                             // console.log('result :');
                             // console.log(result);
                             res.render('index', {
+                                inboxType: 'SPAM',
                                 result: result,
                                 app_url: process.env.APP_URL,
                                 token: req.session.token,
@@ -326,20 +495,35 @@ app.get('/trash', (req, res) => {
                         if (err) console.log('The API 2 returned an error: ' + err);
                         // console.log(message.data.payload.headers);
 
+                        if (message.data.payload.parts !== undefined) {
+                            if (message.data.payload.parts[1].body.attachmentId !== undefined) {
+                                // console.log('Attachment :', message.data.payload.parts[1]);
+                                attachmentId = message.data.payload.parts[1].body.attachmentId
+                                // console.log('Attachment found');
+                            } else {
+                                attachmentId = ''
+                                // console.log('No attachment.')
+                            }
+                        } else {
+                            attachmentId = ''
+                            // console.log('No attachment.')
+                        }
+
                         let data = {
                             'id': message.data.id,
                             'from': message.data.payload.headers.find(x => x.name === "From").value,
                             'subject': message.data.payload.headers.find(x => x.name === "Subject").value.replace(/[^a-zA-Z0-9:']/g, " "),
-                            'date': new Date(Number(message.data.internalDate) / 1000)
+                            'date': new Date(Number(message.data.internalDate)),
+                            'attachmentId': attachmentId
                         };
 
                         result.push(data);
 
                         if (result.length == messages.length) {
-                            // console.log('------------------------');
-                            // console.log('result :');
-                            // console.log(result);
+                            result.sort((a, b) => b.date - a.date)
+
                             res.render('index', {
+                                inboxType: 'TRASH',
                                 result: result,
                                 app_url: process.env.APP_URL,
                                 token: req.session.token,
@@ -358,17 +542,63 @@ app.get('/trash', (req, res) => {
     }
 })
 
-app.get('/message/:id', (req, res) => {
+app.get('/message/:id', async (req, res) => {
     if (req.session.token !== undefined) {
         const gmail = google.gmail({version: 'v1', auth: oAuth2Client});
         gmail.users.messages.get({
             'userId': 'me',
             'id': req.params.id
-        }, (err, message) => {
+        }, async (err, message) => {
             if (err) console.log('The API returned an error: ' + err);
             // console.log(message.data.payload.headers);
-            body = Buffer.from(message.data.payload.parts[0].body.data, 'base64');
-            // console.log('Message :', body.toString("utf-8"));
+
+            let attachment = ''
+            if (message.data.payload.parts !== undefined) {
+                // console.log(message.data.payload.parts[0])
+                // console.log(typeof(message.data.payload.parts[0]))
+                if (message.data.payload.parts[0].body.data !== undefined) {
+                    body = Buffer.from(message.data.payload.parts[0].body.data, 'base64');
+                } else {
+                    body = Buffer.from(message.data.payload.parts[0].parts[0].body.data, 'base64');
+                }
+                // console.log(message.data.payload.parts[0].parts[0].body.data)
+                // console.log('Message :', body.toString("utf-8"));
+
+                if (message.data.payload.parts[1].body.attachmentId !== undefined) {
+                    // console.log('Attachment :', message.data.payload.parts[1].body.attachmentId);
+                    // console.log('Type :', message.data.payload.parts[1].mimeType);
+                    // console.log('Filename :', message.data.payload.parts[1].filename);
+                    attachmentId = message.data.payload.parts[1].body.attachmentId;
+                    type = message.data.payload.parts[1].mimeType;
+                    filename = message.data.payload.parts[1].filename;
+                    await gmail.users.messages.attachments.get({
+                        'userId': 'me',
+                        'messageId': req.params.id,
+                        'id': attachmentId
+                    })
+                    .then((response) => {
+                        attachment = {
+                            'attachmentId': attachmentId,
+                            'filename': filename,
+                            'type': type,
+                            'data': response.data.data
+                        }
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                    })
+                } else {
+                    // console.log('No attachment.')
+                }
+            } else {
+                body = Buffer.from(message.data.payload.body.data, 'base64');
+            }
+
+            // console.log('message 1 :', message.data.payload.parts[0].body.data)
+            // console.log('message 2 :', body)
+            // console.log('message 3 :', body.toString('utf-8'))
+            // console.log('message 4 :', body.toString('ascii'))
+            // console.log(attachment.data)
 
             let result = {
                 'id': message.data.id,
@@ -376,12 +606,10 @@ app.get('/message/:id', (req, res) => {
                 'to': message.data.payload.headers.find(x => x.name === "To").value,
                 'subject': message.data.payload.headers.find(x => x.name === "Subject").value.replace(/[^a-zA-Z0-9:']/g, " "),
                 'body': body.toString("utf-8"),
-                'date': new Date(Number(message.data.internalDate) / 1000)
+                'date': new Date(Number(message.data.internalDate)),
+                'attachment': attachment
             };
 
-            // console.log('------------------------');
-            // console.log('result :');
-            // console.log(result);
             res.render('message', {
                 result: result,
                 app_url: process.env.APP_URL,
@@ -425,17 +653,17 @@ app.post('/new-email', async (req, res) => {
 
             signature = ecdsa_code.sign(message, ecdsa_code.privateKeyHex, hexedKey = true, hexedOutput = true);
 
-            message = message + "<br>" + "-----BEGIN PGP SIGNATURE-----<br>" +  signature + "<br>-----END PGP SIGNATURE-----";
+            message = message + "\n-----BEGIN_PGP_SIGNATURE-----\n" +  signature + "\n-----END_PGP_SIGNATURE-----";
         } else {
             res.redirect('/');
         }
     }
-
+    console.log(`Message tahap ini : ${message}`)
     if (data.encrypted) {
         let Enckey = data.newCipherKey
         // Encryption
         if (Enckey) {
-            await blockCipher.encrypt(data.newMessage, Enckey)
+            await blockCipher.encrypt(message, Enckey)
             .then(encrypted => {
                 message = encrypted
             })
@@ -450,7 +678,6 @@ app.post('/new-email', async (req, res) => {
 })
 
 function sendEmail(subj, email, text, files, auth) {
-    // console.log(files)
     const gmail = google.gmail({version: 'v1', auth: oAuth2Client});
 
     const subject = subj;
@@ -503,15 +730,10 @@ function sendEmail(subj, email, text, files, auth) {
             raw: encodedMessage,
         },
     }, (err, res) => {
-        if (err) return console.log('The API returned an error: ' + err);
-        // const messages = res.data.messages;
-        // if (messages.length) {
-        //   console.log('Messages:');
-        //   messages.forEach((message) => {
-        //     console.log(`- ${message.id} | ${message.threadId}`);
-        //   });
-        // } else {
-        console.log('Email sent');
-      // }
+        if (err) {
+            return console.log('The API returned an error: ' + err);
+        } else {
+            console.log('Email sent');
+        }
     });
 }
