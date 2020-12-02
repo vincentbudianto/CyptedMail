@@ -114,6 +114,46 @@ app.get('/logout', (req, res) => {
     })
 })
 
+app.post('/decrypt', (req, res) => {
+    let key = req.body.key
+    let message = req.body.message
+    // Decrypt message
+
+    blockCipher.decrypt(message, key)
+    .then(decrypted => {
+        console.log("DECRYPTED: ")
+        console.log(decrypted)
+        res.send(decrypted)
+    })
+})
+
+
+app.post('/verify', (req, res) => {
+    console.log(req.body)
+    let key = req.body.key
+    let message = req.body.message
+    let ecdsa_code = new ecdsa.ECDSA(a, b, p, g, n);
+
+    try{
+        text = message.split("-----BEGIN PGP SIGNATURE-----");
+        initial_message = text[0];
+        console.log(`message: ${initial_message}`)
+
+        //Parse message
+        signature = text[1].split("-----END PGP SIGNATURE-----");
+        sign = signature[0]
+        console.log(`signature: ${sign}`)
+
+        //Verify Message
+        ecdsa_code.setPublicKeyHex(key)
+        verify = ecdsa_code.verify(initial_message, sign, ecdsa_code.publicKeyHex, hexedKey = true, hexedSign = true)
+        res.send(verify)
+    }catch(err){
+        console.log(err)
+        res.send(false)
+    }
+})
+
 app.get('/inbox', (req, res) => {
     if (req.session.token !== undefined) {
         const gmail = google.gmail({version: 'v1', auth: oAuth2Client});
@@ -378,13 +418,23 @@ app.get('/message/:id', (req, res) => {
             body = Buffer.from(message.data.payload.parts[0].body.data, 'base64');
             // console.log('Message :', body.toString("utf-8"));
 
+            if (message.data.payload.parts[1].body.attachmentId !== undefined) {
+                // console.log('Attachment :', message.data.payload.parts[1]);
+                attachmentId = message.data.payload.parts[1].body.attachmentId
+                console.log('Attachment found');
+            } else {
+                attachmentId = ''
+                console.log('No attachment.')
+            }
+
             let result = {
                 'id': message.data.id,
                 'from': message.data.payload.headers.find(x => x.name === "From").value,
                 'to': message.data.payload.headers.find(x => x.name === "To").value,
                 'subject': message.data.payload.headers.find(x => x.name === "Subject").value.replace(/[^a-zA-Z0-9:']/g, " "),
                 'body': body.toString("utf-8"),
-                'date': new Date(Number(message.data.internalDate))
+                'date': new Date(Number(message.data.internalDate)),
+                'attachmentId': attachmentId
             };
 
             // console.log('------------------------');
@@ -433,7 +483,7 @@ app.post('/new-email', async (req, res) => {
 
             signature = ecdsa_code.sign(message, ecdsa_code.privateKeyHex, hexedKey = true, hexedOutput = true);
 
-            message = message + "<br>" + "-----BEGIN PGP SIGNATURE-----<br>" +  signature + "<br>-----END PGP SIGNATURE-----";
+            message = message + "<br>-----BEGIN PGP SIGNATURE-----<br>" +  signature + "<br>-----END PGP SIGNATURE-----";
         } else {
             res.redirect('/');
         }

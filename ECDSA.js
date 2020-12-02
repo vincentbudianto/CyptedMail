@@ -185,6 +185,8 @@ module.exports = {
                 s = signature[1]
             } else {
                 let splitted = signature.split(" ")
+                console.log('Signature:', signature)
+                console.log('Splitted signature public key:', splitted)
                 r = BigInt('0x' + splitted[0])
                 s = BigInt('0x' + splitted[1])
             }

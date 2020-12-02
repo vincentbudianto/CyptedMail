@@ -22,8 +22,8 @@ fs.readFile('credentials.json', (err, content) => {
   /*
     BUAT NYOBA DAPETIN Message
   */
-  // authorize(JSON.parse(content), getInbox);
-  authorize(JSON.parse(content), getSent);
+  authorize(JSON.parse(content), getInbox);
+  // authorize(JSON.parse(content), getSent);
 
   /*
     BUAT NYOBA Send Message
@@ -114,7 +114,7 @@ function getInbox(auth) {
   gmail.users.messages.list({
     userId: 'me',
     labelIds: 'INBOX',
-    maxResults: 1
+    maxResults: 3
   }, (err, res) => {
     if (err) return console.log('The API returned an error: ' + err);
     const messages = res.data.messages;
@@ -128,11 +128,19 @@ function getInbox(auth) {
           if (err) return console.log('The API returned an error: ' + err);
           let result = res.data;
           console.log(`- ${result.id} | ${result.threadId}`);
-          console.log('Snippet :', result.snippet);
-          console.log('Headers :', result.payload.headers);
+          // console.log('Snippet :', result.snippet);
+          // console.log('Headers :', result.payload.headers);
+          console.log('Header :', result.payload.headers.find(x => x.name === "Subject").value.replace(/[^a-zA-Z0-9:']/g, " "));
+          data = Buffer.from(result.payload.parts[0].body.data, 'base64');
+          console.log('Message :', data.toString("utf-8"));
           // console.log('Message :', result.payload.parts[0].body.data);
-          // data = Buffer.from(result.payload.parts[0].body.data, 'base64');
-          // console.log('Message :', data.toString("utf-8"));
+          if (result.payload.parts[1].body.attachmentId !== undefined) {
+            console.log('Attachment :', result.payload.parts[1].body);
+            // console.log('Attachment :', result.payload.parts[1]);
+          } else {
+            console.log('No attachment.')
+          }
+          // console.log('Message :', result.payload.parts[1].body.data);
         });
       });
     } else {

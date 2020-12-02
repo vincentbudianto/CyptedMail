@@ -75,11 +75,35 @@
                                     <h4 class="modal-title" id="myModalLabel"><%= result.from %></h4>
                                     <h4 class="modal-title" id="myModalLabel"><%= result.to %></h4>
                                     <h4 class="modal-title" id="myModalLabel"><%= result.date %></h4>
-                                    <h4 class="modal-title" id="myModalLabel"><%= result.body %></h4>
                                 </div>
                                 <div class="body">
-                                    <iframe id="message-iframe-'+message.id+'" srcdoc="<p>Loading...</p>">
-                                    </iframe>
+									<h4 class="modal-title" id="myModalLabel"><%= result.body %></h4>
+                                </div>
+                                <div class="form">
+                                    <form method="POST" action="/decrypt">
+                                        <div class="col-md-3">
+                                            <p>BlockCipher Key: </p>
+                                        </div>
+
+                                        <div class="col-md-9">
+                                            <input type="text" name="key" placeholder="Enter key" class="form-control">
+                                        </div>
+                                        <input hidden value="<%= result.body %>" name="message">
+                                        <button type="submit" class="btn btn-primary">Decrypt</button>
+                                    </form>
+                                </div>
+                                <div class="form">
+                                    <form method="POST" action="/verify">
+                                        <div class="col-md-3">
+                                            <p>Sign Key: </p>
+                                        </div>
+
+                                        <div class="col-md-9">
+                                            <input type="text" name="key" placeholder="Enter key" class="form-control">
+                                        </div>
+                                        <input hidden value="<%= result.body %>" name="message">
+                                        <button type="submit" class="btn btn-primary">Verify</button>
+                                    </form>
                                 </div>
                             </div>
                         </div>
