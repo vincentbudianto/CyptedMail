@@ -155,7 +155,7 @@
                 </div>
             </div>
 
-            <!-- Modal view -->
+            <!-- Modal new message -->
             <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModal" aria-hidden="true">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
@@ -247,6 +247,24 @@
                                 <button type="submit" class="btn btn-primary">Send</button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            </div>
+            <!-- End of modal -->
+
+            <!-- Modal message preview -->
+            <div class="modal fade" id="message-modal-' + message.id + '" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myModalLabel"><%= Subject %></h4>
+                        </div>
+                        <div class="modal-body">
+                            <iframe id="message-iframe-'+message.id+'" srcdoc="<p>Loading...</p>">
+                            </iframe>
+                        </div>
                     </div>
                 </div>
             </div>

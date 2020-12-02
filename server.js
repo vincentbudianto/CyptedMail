@@ -369,7 +369,7 @@ app.get('/mail/:id', (req, res) => {
         body = Buffer.from(message.data.payload.parts[0].body.data, 'base64');
         // console.log('Message :', body.toString("utf-8"));
 
-        let data = {
+        let result = {
             'id': message.data.id,
             'from': message.data.payload.headers.find(x => x.name === "From").value,
             'to': message.data.payload.headers.find(x => x.name === "To").value,
@@ -377,8 +377,6 @@ app.get('/mail/:id', (req, res) => {
             'body': body.toString("utf-8"),
             'date': new Date(Number(message.data.internalDate) / 1000)
         };
-
-        result.push(data);
 
         if (result.length == messages.length) {
             // console.log('------------------------');
@@ -391,7 +389,6 @@ app.get('/mail/:id', (req, res) => {
                 client_id: process.env.CLIENT_ID,
                 client_secret: process.env.CLIENT_SECRET
             })
-            // res.redirect('/trash/' + nextToken)
         }
     })
 })
