@@ -242,7 +242,7 @@
                                 <!-- <button type="button" class="btn btn-primary pull-left" id="btn_file">
                                     <span class="fa fa-paperclip fa-2x"></span>
                                 </button> -->
-                                
+
                                 <input name="attached_file" type="file" id="attached_file"/>
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                                 <button type="submit" class="btn btn-primary">Send</button>
@@ -252,25 +252,6 @@
                 </div>
             </div>
             <!-- End of modal -->
-
-            <!-- Modal message preview -->
-            <div class="modal fade" id="message-modal-' + message.id + '" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-                <div class="modal-dialog modal-lg">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title" id="myModalLabel"><%= Subject %></h4>
-                        </div>
-                        <div class="modal-body">
-                            <iframe id="message-iframe-'+message.id+'" srcdoc="<p>Loading...</p>">
-                            </iframe>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- End of modal -->
-
         </div>
     </div>
 </div>
@@ -315,33 +296,17 @@
     }
 ];
 
-let gridData = [
+let gridData = []
+"<% result.forEach((res) => { %>"
+gridData.push(
     {
-        "sender" : "<%= result[0].from %>",
-        "message": "<%= result[0].subject %>",
-        "date": "<%= result[0].date %>"
-    },
-    {
-        "sender" : "<%= result[1].from %>",
-        "message": "<%= result[1].subject %>",
-        "date": "<%= result[1].date %>"
-    },
-    {
-        "sender" : "<%= result[2].from %>",
-        "message": "<%= result[2].subject %>",
-        "date": "<%= result[2].date %>"
-    },
-    {
-        "sender" : "<%= result[3].from %>",
-        "message": "<%= result[3].subject %>",
-        "date": "<%= result[3].date %>"
-    },
-    {
-        "sender" : "<%= result[4].from %>",
-        "message": "<%= result[4].subject %>",
-        "date": "<%= result[4].date %>"
+        "id": "<%= res.id %>",
+        "sender" : "<%= res.from %>",
+        "message": "<%= res.subject %>",
+        "date": "<%= res.date %>"
     }
-];
+)
+"<% }) %>"
 
 $(function () {
     $("#inboxButton").click(function () {
@@ -384,7 +349,7 @@ $(function () {
             multiple: true
         },
         paging: {
-            pageSize: 12,
+            pageSize: 5,
             pageLinksCount: 10
         },
         selection: {
@@ -405,6 +370,7 @@ $(function () {
                 if (e.commandName == "selectionChanged") {
                     let toBeSelected = e.toBeSelected;  //- array with all elements which will be selected
                     console.log(e.indices[0]);
+                    window.location.href = "<%= app_url %>" + "message/" + gridData[e.indices[0]]["id"]
                 }
             }
         }

@@ -125,7 +125,7 @@ app.get('/inbox', (req, res) => {
             pageToken: pageToken,
             includeSpamTrash: true,
             q: '',
-            maxResults: 10
+            maxResults: 100
         }, (err, messageList) => {
             if (err) return console.log('The API 1 returned an error: ' + err);
             const messages = messageList.data.messages;
@@ -163,7 +163,6 @@ app.get('/inbox', (req, res) => {
                                 client_id: process.env.CLIENT_ID,
                                 client_secret: process.env.CLIENT_SECRET
                             })
-                            // res.redirect('/sent/' + nextToken)
                         }
                     })
                 });
@@ -187,7 +186,7 @@ app.get('/sent', (req, res) => {
             pageToken: pageToken,
             includeSpamTrash: true,
             q: '',
-            maxResults: 10
+            maxResults: 100
         }, (err, messageList) => {
             if (err) return console.log('The API 1 returned an error: ' + err);
             const messages = messageList.data.messages;
@@ -225,7 +224,6 @@ app.get('/sent', (req, res) => {
                                 client_id: process.env.CLIENT_ID,
                                 client_secret: process.env.CLIENT_SECRET
                             })
-                            // res.redirect('/sent/' + nextToken)
                         }
                     })
                 });
@@ -249,7 +247,7 @@ app.get('/spam', (req, res) => {
             pageToken: pageToken,
             includeSpamTrash: true,
             q: '',
-            maxResults: 10
+            maxResults: 100
         }, (err, messageList) => {
             if (err) return console.log('The API 1 returned an error: ' + err);
             const messages = messageList.data.messages;
@@ -287,7 +285,6 @@ app.get('/spam', (req, res) => {
                                 client_id: process.env.CLIENT_ID,
                                 client_secret: process.env.CLIENT_SECRET
                             })
-                            // res.redirect('/spam/' + nextToken)
                         }
                     })
                 });
@@ -311,7 +308,7 @@ app.get('/trash', (req, res) => {
             pageToken: pageToken,
             includeSpamTrash: true,
             q: '',
-            maxResults: 10
+            maxResults: 100
         }, (err, messageList) => {
             if (err) return console.log('The API 1 returned an error: ' + err);
             const messages = messageList.data.messages;
@@ -349,7 +346,6 @@ app.get('/trash', (req, res) => {
                                 client_id: process.env.CLIENT_ID,
                                 client_secret: process.env.CLIENT_SECRET
                             })
-                            // res.redirect('/trash/' + nextToken)
                         }
                     })
                 });
@@ -362,38 +358,41 @@ app.get('/trash', (req, res) => {
     }
 })
 
-app.get('/mail/:id', (req, res) => {
-    gmail.users.messages.get({
-        'userId': 'me',
-        'id': message.id
-    }, (err, message) => {
-        if (err) console.log('The API 2 returned an error: ' + err);
-        // console.log(message.data.payload.headers);
-        body = Buffer.from(message.data.payload.parts[0].body.data, 'base64');
-        // console.log('Message :', body.toString("utf-8"));
+app.get('/message/:id', (req, res) => {
+    if (req.session.token !== undefined) {
+        const gmail = google.gmail({version: 'v1', auth: oAuth2Client});
+        gmail.users.messages.get({
+            'userId': 'me',
+            'id': req.params.id
+        }, (err, message) => {
+            if (err) console.log('The API returned an error: ' + err);
+            // console.log(message.data.payload.headers);
+            body = Buffer.from(message.data.payload.parts[0].body.data, 'base64');
+            // console.log('Message :', body.toString("utf-8"));
 
-        let result = {
-            'id': message.data.id,
-            'from': message.data.payload.headers.find(x => x.name === "From").value,
-            'to': message.data.payload.headers.find(x => x.name === "To").value,
-            'subject': message.data.payload.headers.find(x => x.name === "Subject").value.replace(/[^a-zA-Z0-9:']/g, " "),
-            'body': body.toString("utf-8"),
-            'date': new Date(Number(message.data.internalDate) / 1000)
-        };
+            let result = {
+                'id': message.data.id,
+                'from': message.data.payload.headers.find(x => x.name === "From").value,
+                'to': message.data.payload.headers.find(x => x.name === "To").value,
+                'subject': message.data.payload.headers.find(x => x.name === "Subject").value.replace(/[^a-zA-Z0-9:']/g, " "),
+                'body': body.toString("utf-8"),
+                'date': new Date(Number(message.data.internalDate) / 1000)
+            };
 
-        if (result.length == messages.length) {
             // console.log('------------------------');
             // console.log('result :');
             // console.log(result);
-            res.render('index', {
+            res.render('message', {
                 result: result,
                 app_url: process.env.APP_URL,
                 token: req.session.token,
                 client_id: process.env.CLIENT_ID,
                 client_secret: process.env.CLIENT_SECRET
             })
-        }
-    })
+        })
+    } else {
+        res.redirect("/sign")
+    }
 })
 
 app.post('/new-email', async (req, res) => {
@@ -407,7 +406,7 @@ app.post('/new-email', async (req, res) => {
     if(file_attach){
         files = req.files.attached_file
     }
-    
+
     let data = req.body
     if (data.targetEmail == undefined ||
         data.newSubject == undefined ||
@@ -456,7 +455,7 @@ function sendEmail(subj, email, text, files, auth) {
 
     const subject = subj;
     const utf8Subject = `=?utf-8?B?${Buffer.from(subject).toString('base64')}?=`;
-    
+
     var messageParts = []
     if(files===undefined){
         messageParts = [
@@ -490,7 +489,6 @@ function sendEmail(subj, email, text, files, auth) {
             "--" + boundary + "--"
         ]
     }
-    
     const message = messageParts.join('\n');
 
     // The body needs to be base64url encoded.
@@ -499,7 +497,6 @@ function sendEmail(subj, email, text, files, auth) {
         .replace(/\+/g, '-')
         .replace(/\//g, '_')
         .replace(/=+$/, '');
-
     gmail.users.messages.send({
         userId: 'me',
         requestBody: {
