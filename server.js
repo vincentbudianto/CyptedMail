@@ -286,11 +286,13 @@ app.get('/inbox', (req, res) => {
                         let subject = ''
 
                         try {
-                            if (message.data.payload.parts.length > 0) {
-                                if (message.data.payload.parts[1].body.attachmentId !== undefined) {
-                                    // console.log('Attachment :', message.data.payload.parts[1]);
-                                    attachmentId = message.data.payload.parts[1].body.attachmentId
-                                    // console.log('Attachment found');
+                            if (message.data.payload.parts !== undefined) {
+                                if (message.data.payload.parts.length > 0) {
+                                    if (message.data.payload.parts[1].body.attachmentId !== undefined) {
+                                        // console.log('Attachment :', message.data.payload.parts[1]);
+                                        attachmentId = message.data.payload.parts[1].body.attachmentId
+                                        // console.log('Attachment found');
+                                    }
                                 }
                             }
                         } catch(err) {
@@ -377,15 +379,14 @@ app.get('/sent', (req, res) => {
                         let subject = ''
 
                         try {
-                            if (message.data.payload.parts.length > 0) {
-                                if (message.data.payload.parts[1].body.attachmentId !== undefined) {
-                                    // console.log('Attachment :', message.data.payload.parts[1]);
-                                    attachmentId = message.data.payload.parts[1].body.attachmentId
-                                    // console.log('Attachment found');
+                            if (message.data.payload.parts !== undefined) {
+                                if (message.data.payload.parts.length > 0) {
+                                    if (message.data.payload.parts[1].body.attachmentId !== undefined) {
+                                        // console.log('Attachment :', message.data.payload.parts[1]);
+                                        attachmentId = message.data.payload.parts[1].body.attachmentId
+                                        // console.log('Attachment found');
+                                    }
                                 }
-                            } else {
-                                    attachmentId = ''
-                                    // console.log('No attachment.')
                             }
                         } catch {
                             attachmentId = ''
@@ -472,15 +473,14 @@ app.get('/spam', (req, res) => {
                         let subject = ''
 
                         try {
-                            if (message.data.payload.parts.length > 0) {
-                                if (message.data.payload.parts[1].body.attachmentId !== undefined) {
-                                    // console.log('Attachment :', message.data.payload.parts[1]);
-                                    attachmentId = message.data.payload.parts[1].body.attachmentId
-                                    // console.log('Attachment found');
+                            if (message.data.payload.parts !== undefined) {
+                                if (message.data.payload.parts.length > 0) {
+                                    if (message.data.payload.parts[1].body.attachmentId !== undefined) {
+                                        // console.log('Attachment :', message.data.payload.parts[1]);
+                                        attachmentId = message.data.payload.parts[1].body.attachmentId
+                                        // console.log('Attachment found');
+                                    }
                                 }
-                            } else {
-                                    attachmentId = ''
-                                    // console.log('No attachment.')
                             }
                         } catch {
                             attachmentId = ''
@@ -567,15 +567,14 @@ app.get('/trash', (req, res) => {
                         let subject = ''
 
                         try {
-                            if (message.data.payload.parts.length > 0) {
-                                if (message.data.payload.parts[1].body.attachmentId !== undefined) {
-                                    // console.log('Attachment :', message.data.payload.parts[1]);
-                                    attachmentId = message.data.payload.parts[1].body.attachmentId
-                                    // console.log('Attachment found');
+                            if (message.data.payload.parts !== undefined) {
+                                if (message.data.payload.parts.length > 0) {
+                                    if (message.data.payload.parts[1].body.attachmentId !== undefined) {
+                                        // console.log('Attachment :', message.data.payload.parts[1]);
+                                        attachmentId = message.data.payload.parts[1].body.attachmentId
+                                        // console.log('Attachment found');
+                                    }
                                 }
-                            } else {
-                                    attachmentId = ''
-                                    // console.log('No attachment.')
                             }
                         } catch {
                             attachmentId = ''
@@ -760,6 +759,28 @@ app.post('/new-email', async (req, res) => {
     // Send message here
     sendingEmail = sendEmail(data.newSubject, data.targetEmail, message, files, oAuth2Client)
     res.redirect('/inbox')
+})
+
+app.get('/generate-key', (req, res) => {
+    if (req.session.token !== undefined) {
+        let ecdsa_code = new ecdsa.ECDSA(a, b, p, g, n);
+        ecdsa_code.setKeyRandom()
+
+        let result = {
+            'public': ecdsa_code.publicKeyHex,
+            'private': ecdsa_code.privateKeyHex
+        }
+
+        res.render('generatekey', {
+            result: result,
+            app_url: process.env.APP_URL,
+            token: req.session.token,
+            client_id: process.env.CLIENT_ID,
+            client_secret: process.env.CLIENT_SECRET
+        })
+    } else {
+        res.redirect("/sign")
+    }
 })
 
 function sendEmail(subj, email, text, files, auth) {

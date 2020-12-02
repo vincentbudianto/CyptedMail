@@ -40,6 +40,11 @@
             console.log('get trash.');
         }
 
+        function generateKey() {
+            window.location.href = "<%= app_url %>" + "generate-key";
+            console.log('get key.');
+        }
+
         function base64ToArrayBuffer(base64) {
             // let data = base64.replace('-', '+');
             // data = data.replace('_', '/');
@@ -102,6 +107,7 @@
                                 <button class="btn btn-block" onclick="sent()">Sent</button>
                                 <button class="btn btn-block" onclick="spam()">Spam</button>
                                 <button class="btn btn-block" onclick="trash()">Trash</button>
+                                <button class="btn btn-block" onclick="generateKey()">Generate Key</button>
                             </div>
                         </div>
                         <!-- /.navbar-collapse -->

@@ -52,6 +52,10 @@
         console.log('get trash.');
     }
 
+    function generateKey() {
+        window.location.href = "<%= app_url %>" + "generate-key";
+        console.log('get key.');
+    }
 </script>
 
 <!-- E-mail Client - START -->
@@ -86,6 +90,7 @@
                             <button class="btn btn-block" onclick="sent()">Sent</button>
                             <button class="btn btn-block" onclick="spam()">Spam</button>
                             <button class="btn btn-block" onclick="trash()">Trash</button>
+                            <button class="btn btn-block" onclick="generateKey()">Generate Key</button>
                         </div>
                     </div>
                     <!-- /.navbar-collapse -->

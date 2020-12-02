@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>CryptedMail Decrypted Message</title>
+    <title>CryptedMail Key Generator</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="google-signin-client_id" content=<%= client_id %>>
 
@@ -17,11 +17,6 @@
 
 <body>
     <script>
-        function goback() {
-            // alert();
-            window.history.go(-1);
-        }
-
         function signOut() {
             window.location.href = "<%= app_url %>" + "logout";
             console.log('User signed out.');
@@ -87,7 +82,6 @@
                                     <button class="btn btn-block" onclick="spam()">Spam</button>
                                     <button class="btn btn-block" onclick="trash()">Trash</button>
                                     <button class="btn btn-block" onclick="generateKey()">Generate Key</button>
-                                    <button class="btn btn-block" onclick="goback()">Back</button>
                                 </div>
                             </div>
                             <!-- /.navbar-collapse -->
@@ -98,28 +92,25 @@
                                     <div class="panel-heading">
                                         <div class="row">
                                             <div class="col-md" style="margin-left: 15px;">
-                                                <h3 class="modal-title" id="myModalLabel">Decrypted Message</h3>
+                                                <h3 class="modal-title" id="myModalLabel">ECDSA Key</h3>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="body"
-                                        style="height: 25vh; margin: 15px 15px 15px 15px; border-style: solid; border-radius: 10px; border-width: 1px; padding: 7.5px; border-color: #ccc;">
-                                        <textarea class="modal-title" id="myModalLabel"
-                                            style="border: none; width: 100%;" readonly
-                                            rows="9"><%= verResult %></textarea>
-                                    </div>
-                                    <div class="form">
-                                        <form method="POST" action="/decryptnverify">
-                                            <div class="col-md-3">
-                                                <p>Sign Key: </p>
-                                            </div>
-
-                                            <div class="col-md-9">
-                                                <input type="text" name="verKey" placeholder="Enter key" class="form-control" style="margin-bottom: 7.5px;">
-                                            </div>
-                                            <input hidden value="<%= verResult %>" name="message">
-                                            <button type="submit" class="btn btn-primary" style="margin-left: 15px;">Dekripsi & Verify</button>
-                                        </form>
+                                    <div style="margin-top: 15px; margin-left: 15px;">
+                                        <h5 class="modal-title" id="myModalLabel"><b>Public Key</b></h5>
+                                        <div class="body"
+                                            style="margin: 15px 15px 15px 15px; border-style: solid; border-radius: 10px; border-width: 1px; padding: 7.5px; border-color: #ccc;">
+                                            <textarea class="modal-title" id="myModalLabel"
+                                                style="border: none; width: 100%;" readonly
+                                                rows="1"><%= result.public %></textarea>
+                                        </div>
+                                        <h5 class="modal-title" id="myModalLabel"><b>Private Key</b></h5>
+                                        <div class="body"
+                                            style="margin: 15px 15px 15px 15px; border-style: solid; border-radius: 10px; border-width: 1px; padding: 7.5px; border-color: #ccc;">
+                                            <textarea class="modal-title" id="myModalLabel"
+                                                style="border: none; width: 100%;" readonly
+                                                rows="1"><%= result.private %></textarea>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
