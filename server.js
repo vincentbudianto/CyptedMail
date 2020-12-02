@@ -478,9 +478,14 @@ app.get('/message/:id', async (req, res) => {
 
             let attachment = ''
             if (message.data.payload.parts !== undefined) {
-                console.log(message.data.payload.parts[0])
-                console.log(typeof(message.data.payload.parts[0]))
-                body = Buffer.from(message.data.payload.parts[0].body.data, 'base64');
+                // console.log(message.data.payload.parts[0])
+                // console.log(typeof(message.data.payload.parts[0]))
+                if (message.data.payload.parts[0].body.data !== undefined) {
+                    body = Buffer.from(message.data.payload.parts[0].body.data, 'base64');
+                } else {
+                    body = Buffer.from(message.data.payload.parts[0].parts[0].body.data, 'base64');
+                }
+                // console.log(message.data.payload.parts[0].parts[0].body.data)
                 // console.log('Message :', body.toString("utf-8"));
 
                 if (message.data.payload.parts[1].body.attachmentId !== undefined) {
