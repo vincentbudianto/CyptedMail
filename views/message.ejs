@@ -126,7 +126,7 @@
                                 <div class="body" style="height: 25vh; margin: 15px 15px 15px 15px; border-style: solid; border-radius: 10px; border-width: 1px; padding: 7.5px; border-color: #ccc;">
 									<textarea class="modal-title" id="myModalLabel" style="border: none; width: 100%;" readonly rows="9"><%= result.body %></textarea>
                                 </div>
-                                <div class="form" style="margin-bottom: 15px;">
+                                <!-- <div class="form" style="margin-bottom: 15px;">
                                     <form method="POST" action="/decrypt">
                                         <div class="col-md-3">
                                             <p>BlockCipher Key: </p>
@@ -151,7 +151,7 @@
                                         <input hidden value="<%= result.body %>" name="message">
                                         <button type="submit" class="btn btn-primary" style="margin-left: 15px;">Verify</button>
                                     </form>
-                                </div>
+                                </div> -->
                                 <div class="form">
                                     <form method="POST" action="/decryptnverify">
                                         <div class="col-md-3">
@@ -159,7 +159,7 @@
                                         </div>
 
                                         <div class="col-md-9">
-                                            <input required type="text" name="decKey" placeholder="Enter key" class="form-control" maxlength="8" style="margin-bottom: 7.5px;">
+                                            <input type="text" name="decKey" placeholder="Enter key" class="form-control" maxlength="8" style="margin-bottom: 7.5px;">
                                         </div>
 
                                         <div class="col-md-3">
@@ -167,7 +167,7 @@
                                         </div>
 
                                         <div class="col-md-9">
-                                            <input required type="text" name="verKey" placeholder="Enter key" class="form-control" style="margin-bottom: 7.5px;">
+                                            <input type="text" name="verKey" placeholder="Enter key" class="form-control" style="margin-bottom: 7.5px;">
                                         </div>
                                         <input hidden value="<%= result.body %>" name="message">
                                         <button type="submit" class="btn btn-primary" style="margin-left: 15px;">Dekripsi & Verify</button>

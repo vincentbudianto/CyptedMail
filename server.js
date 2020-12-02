@@ -126,8 +126,12 @@ app.post('/decrypt', (req, res) => {
         // alert(decrypted)
         // res.send(decrypted)
         // res.redirect('/inbox')
-        res.render('verify', {
-            verResult: decrypted
+        res.render('decrypted', {
+            verResult: decrypted,
+            app_url: process.env.APP_URL,
+            token: req.session.token,
+            client_id: process.env.CLIENT_ID,
+            client_secret: process.env.CLIENT_SECRET
         })
     })
     .catch((err) => {
@@ -137,15 +141,34 @@ app.post('/decrypt', (req, res) => {
     })
 })
 
-app.post('/decryptnverify', (req, res) => {
+app.post('/decryptnverify', async (req, res) => {
     let dkey = req.body.decKey
     let dmessage = req.body.message
+    let message = req.body.message
     // Decrypt message
 
-    blockCipher.decrypt(dmessage, dkey)
-    .then(decrypted => {
+    if (req.body.decKey) {
+        await blockCipher.decrypt(dmessage, dkey)
+        .then(decrypted => {
+            console.log("DECRYPTED: ")
+            console.log(decrypted)
+            // alert(decrypted)
+            // res.send(decrypted)
+            // res.redirect('/inbox')
+            // res.render('verify', {
+            //     verResult: decrypted
+            // })
+            message = decrypted
+        })
+        .catch((err) => {
+            res.render('verify', {
+                verResult: "Terdapat kesalahan dalam dekripsi"
+            })
+        })
+    }
+    if (req.body.verKey) {
         let key = req.body.verkey
-        let message = decrypted
+        console.log(key);
         let ecdsa_code = new ecdsa.ECDSA(a, b, p, g, n);
 
         try{
@@ -168,8 +191,12 @@ app.post('/decryptnverify', (req, res) => {
             // res.redirect('/inbox')
             let verResult = (verify === true ? "Terverifikasi: " : "Tidak Terverifikasi: ")
             verResult += "\n" + message
-            res.render('verify', {
-                verResult: verResult
+            res.render('decrypted', {
+                verResult: verResult,
+                app_url: process.env.APP_URL,
+                token: req.session.token,
+                client_id: process.env.CLIENT_ID,
+                client_secret: process.env.CLIENT_SECRET
             })
             // res.send(verify)
         }catch(err){
@@ -178,21 +205,15 @@ app.post('/decryptnverify', (req, res) => {
                 verResult: "Terdapat masalah dalam verifikasi"
             })
         }
-
-        console.log("DECRYPTED: ")
-        console.log(decrypted)
-        // alert(decrypted)
-        // res.send(decrypted)
-        // res.redirect('/inbox')
-        // res.render('verify', {
-        //     verResult: decrypted
-        // })
-    })
-    .catch((err) => {
-        res.render('verify', {
-            verResult: "Terdapat kesalahan dalam dekripsi"
+    } else {
+        res.render('decrypted', {
+            verResult: message,
+            app_url: process.env.APP_URL,
+            token: req.session.token,
+            client_id: process.env.CLIENT_ID,
+            client_secret: process.env.CLIENT_SECRET
         })
-    })
+    }
 })
 
 

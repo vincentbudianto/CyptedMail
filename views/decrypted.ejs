@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>CryptedMail Decrypted Message</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="google-signin-client_id" content=<%= client_id %>>
+
+    <link rel="stylesheet" type="text/css" href="/bootstrap/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/font-awesome/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/index.css" />
+
+    <script type="text/javascript" src="/js/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="/bootstrap/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+    <script>
+        function goback() {
+            // alert();
+            window.history.go(-1);
+        }
+
+        function signOut() {
+            window.location.href = "<%= app_url %>" + "logout";
+            console.log('User signed out.');
+        }
+
+        function inbox() {
+            window.location.href = "<%= app_url %>" + "inbox";
+            console.log('get inbox.');
+        }
+
+        function sent() {
+            window.location.href = "<%= app_url %>" + "sent";
+            console.log('get sent.');
+        }
+
+        function spam() {
+            window.location.href = "<%= app_url %>" + "spam";
+            console.log('get spam.');
+        }
+
+        function trash() {
+            window.location.href = "<%= app_url %>" + "trash";
+            console.log('get trash.');
+        }
+    </script>
+    <div class="container">
+        <div class="page-header">
+            <h1>OksidianToughly <small>A crypted e-mail client</small></h1>
+            <a href="#" onclick="signOut();" style="width: fit-content;">
+                <div class="google-btn-out">
+                    <p class="btn-text"><b>Sign out</b></p>
+                </div>
+            </a>
+        </div>
+        <div class="container pb-mail-template1">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="row">
+                        <nav class="navbar navbar-default pb-mail-navbar">
+                            <div class="container-fluid">
+                                <!-- Brand and toggle get grouped for better mobile display -->
+                                <div class="navbar-header">
+                                    <a class="navbar-brand" id="brand" href="#">Hello, <u>User!</u></a>
+                                </div>
+                            </div>
+                        </nav>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2" id="column-resize">
+                            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                                <div id="loltreeview" style="display: grid;">
+                                    <button id="btn_email" class="btn btn-danger" data-toggle="modal"
+                                        data-target="#myModal" style="margin-bottom: 15px;">
+                                        New E-mail
+                                    </button>
+                                    <button class="btn btn-block" onclick="inbox()">Inbox</button>
+                                    <button class="btn btn-block" onclick="sent()">Sent</button>
+                                    <button class="btn btn-block" onclick="spam()">Spam</button>
+                                    <button class="btn btn-block" onclick="trash()">Trash</button>
+                                    <button class="btn btn-block" onclick="goback()">Back</button>
+                                </div>
+                            </div>
+                            <!-- /.navbar-collapse -->
+                        </div>
+                        <div class="col-md-10">
+                            <div class="row" id="row_style">
+                                <div class="panel panel-default" style="padding-bottom: 45px;">
+                                    <div class="panel-heading">
+                                        <div class="row">
+                                            <div class="col-md" style="margin-left: 15px;">
+                                                <h3 class="modal-title" id="myModalLabel">Decrypted Message</h3>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="body"
+                                        style="height: 25vh; margin: 15px 15px 15px 15px; border-style: solid; border-radius: 10px; border-width: 1px; padding: 7.5px; border-color: #ccc;">
+                                        <textarea class="modal-title" id="myModalLabel"
+                                            style="border: none; width: 100%;" readonly
+                                            rows="9"><%= verResult %></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal new message -->
+                <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModal"
+                    aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <h5>New message</h5>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <form id="new-email" method="POST" action="/new-email" encType="multipart/form-data">
+                                <div class="modal-body">
+                                    <div class="form-group row">
+                                        <div class="col-md-3">
+                                            <p>To: </p>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <input type="text" name="targetEmail" placeholder="Enter e-mail"
+                                                class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-md-3">
+                                            <p>Subject: </p>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <input type="text" name="newSubject" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-md-3">
+                                            <p>Message: </p>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <textarea name="newMessage" class="form-control-message"
+                                                rows="10"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-md-3">
+                                            <p>ECDSA Public Key: </p>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <input type="text" name="newECDSAPublicKey" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-md-3">
+                                            <p>ECDSA Private Key: </p>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <input type="text" name="newECDSAPrivateKey" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-md-3">
+                                            <p>Cipher Key: </p>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <input type="text" name="newCipherKey" class="form-control" maxlength="8">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-md-3">
+                                            <p>Signed? </p>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <input type=checkbox name="signed"></input>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-md-3">
+                                            <p>Encrypted? </p>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <input type=checkbox name="encrypted"></input>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <input name="attached_file" type="file" id="attached_file" />
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary">Send</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <!-- End of modal -->
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
