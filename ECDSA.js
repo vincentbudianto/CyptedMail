@@ -96,6 +96,13 @@ module.exports = {
             let splittedPublic = publicKeyHex.split(" ")
             this.publicKey = [BigInt('0x' + splittedPublic[0]), BigInt('0x' + splittedPublic[1])]
         }
+        
+        setKeyHex(privateKeyHex) {
+            this.privateKeyHex = privateKeyHex
+            this.privateKey = BigInt('0x' + privateKeyHex)
+            this.publicKey = this.curve.multiplyGraphPoint(this.curve.base, this.privateKey)
+            this.publicKeyHex = this.publicKey[0].toString(16) + ' ' + this.publicKey[1].toString(16)
+        }
 
         initiateK(privateKey) {
             let binCount = this.curve.binSize - binReduction

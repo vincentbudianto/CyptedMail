@@ -22,7 +22,8 @@ fs.readFile('credentials.json', (err, content) => {
   /*
     BUAT NYOBA DAPETIN Message
   */
-  authorize(JSON.parse(content), getInbox);
+  // authorize(JSON.parse(content), getInbox);
+  authorize(JSON.parse(content), getSent);
 
   /*
     BUAT NYOBA Send Message
@@ -150,7 +151,7 @@ function getSent(auth) {
   gmail.users.messages.list({
     userId: 'me',
     labelIds: 'SENT',
-    maxResults: 5
+    maxResults: 1
   }, (err, res) => {
     if (err) return console.log('The API returned an error: ' + err);
     const messages = res.data.messages;
@@ -162,9 +163,19 @@ function getSent(auth) {
           'id': message.id
         }, (err, res) => {
           if (err) return console.log('The API returned an error: ' + err);
-          let result = res.data;
-          console.log(`- ${result.id} | ${result.threadId}`);
-          console.log('Message :', result.snippet);
+
+          let result = {
+              'id': res.data.id,
+              'from': res.data.payload.headers.find(x => x.name === "From").value,
+              'subject': res.data.payload.headers.find(x => x.name === "Subject").value.replace(/[^a-zA-Z0-9:']/g, " "),
+              'date': new Date(Number(res.data.internalDate))
+          };
+
+          console.log('Message id :', result.id);
+          console.log('From :', result.from);
+          console.log('Subject :', result.subject);
+          console.log('Date :', typeof(parseInt(res.data.internalDate)));
+          console.log('Date :', result.date);
         });
       });
     } else {

@@ -147,16 +147,18 @@ app.get('/inbox', (req, res) => {
                             'id': message.data.id,
                             'from': message.data.payload.headers.find(x => x.name === "From").value,
                             'subject': message.data.payload.headers.find(x => x.name === "Subject").value.replace(/[^a-zA-Z0-9:']/g, " "),
-                            'date': new Date(Number(message.data.internalDate) / 1000)
+                            'date': new Date(Number(message.data.internalDate))
                         };
 
                         result.push(data);
 
                         if (result.length == messages.length) {
+                            result.sort((a, b) => b.date - a.date)
                             // console.log('------------------------');
                             // console.log('result :');
                             // console.log(result);
                             res.render('index', {
+                                inboxType: 'inbox',
                                 result: result,
                                 app_url: process.env.APP_URL,
                                 token: req.session.token,
@@ -206,18 +208,20 @@ app.get('/sent', (req, res) => {
 
                         let data = {
                             'id': message.data.id,
-                            'from': message.data.payload.headers.find(x => x.name === "From").value,
+                            'from': message.data.payload.headers.find(x => x.name === "To").value,
                             'subject': message.data.payload.headers.find(x => x.name === "Subject").value.replace(/[^a-zA-Z0-9:']/g, " "),
-                            'date': new Date(Number(message.data.internalDate) / 1000)
+                            'date': new Date(Number(message.data.internalDate))
                         };
 
                         result.push(data);
 
                         if (result.length == messages.length) {
+                            result.sort((a, b) => b.date - a.date)
                             // console.log('------------------------');
                             // console.log('result :');
                             // console.log(result);
                             res.render('index', {
+                                inboxType: 'sent',
                                 result: result,
                                 app_url: process.env.APP_URL,
                                 token: req.session.token,
@@ -269,16 +273,18 @@ app.get('/spam', (req, res) => {
                             'id': message.data.id,
                             'from': message.data.payload.headers.find(x => x.name === "From").value,
                             'subject': message.data.payload.headers.find(x => x.name === "Subject").value.replace(/[^a-zA-Z0-9:']/g, " "),
-                            'date': new Date(Number(message.data.internalDate) / 1000)
+                            'date': new Date(Number(message.data.internalDate))
                         };
 
                         result.push(data);
 
                         if (result.length == messages.length) {
+                            result.sort((a, b) => b.date - a.date)
                             // console.log('------------------------');
                             // console.log('result :');
                             // console.log(result);
                             res.render('index', {
+                                inboxType: 'spam',
                                 result: result,
                                 app_url: process.env.APP_URL,
                                 token: req.session.token,
@@ -330,16 +336,18 @@ app.get('/trash', (req, res) => {
                             'id': message.data.id,
                             'from': message.data.payload.headers.find(x => x.name === "From").value,
                             'subject': message.data.payload.headers.find(x => x.name === "Subject").value.replace(/[^a-zA-Z0-9:']/g, " "),
-                            'date': new Date(Number(message.data.internalDate) / 1000)
+                            'date': new Date(Number(message.data.internalDate))
                         };
 
                         result.push(data);
 
                         if (result.length == messages.length) {
+                            result.sort((a, b) => b.date - a.date)
                             // console.log('------------------------');
                             // console.log('result :');
                             // console.log(result);
                             res.render('index', {
+                                inboxType: 'trash',
                                 result: result,
                                 app_url: process.env.APP_URL,
                                 token: req.session.token,
@@ -376,7 +384,7 @@ app.get('/message/:id', (req, res) => {
                 'to': message.data.payload.headers.find(x => x.name === "To").value,
                 'subject': message.data.payload.headers.find(x => x.name === "Subject").value.replace(/[^a-zA-Z0-9:']/g, " "),
                 'body': body.toString("utf-8"),
-                'date': new Date(Number(message.data.internalDate) / 1000)
+                'date': new Date(Number(message.data.internalDate))
             };
 
             // console.log('------------------------');

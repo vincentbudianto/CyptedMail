@@ -360,10 +360,10 @@ $(function () {
         columns: [
             // { field: "check", title: "&nbsp;", width: "2em", attributes: { style: "text-align: center;" } },
             // { field: "icon", title: "&nbsp;", width: "2em", attributes: { style: "text-align: center;" } },
-            { field: "sender", title: "Sender", width: "10em" },
+            { field: "sender", title: "<%- inboxType === 'inbox' ? 'From' : (inboxType === 'sent' ? 'To' : 'From / To') %>", width: "10em" },
             { field: "message", title: "Subject", width: "17em" },
             // { field: "attach", title: "&nbsp;", width: "2em", attributes: { style: "text-align: center;" } },
-            { field: "date", title: "Delivered", width: "6em" }
+            { field: "date", title: "<%- inboxType === 'inbox' ? 'Received' : (inboxType === 'sent' ? 'Delivered' : 'Delivered / Received') %>", width: "6em" }
         ],
         events: {
             command: function (e) {
