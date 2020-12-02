@@ -9,6 +9,7 @@
     "dotenv": "^8.2.0",
     "ejs": "^3.1.5",
     "express": "^4.17.1",
+    "express-fileupload": "^1.2.0",
     "express-session": "^1.17.1",
     "googleapis": "^39.2.0",
     "loader.js": "^4.7.0",
