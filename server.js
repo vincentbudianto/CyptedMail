@@ -140,8 +140,20 @@ app.get('/inbox', (req, res) => {
                         'userId': 'me',
                         'id': message.id
                     }, (err, message) => {
-                        console.log(req.body);
-                        console.log(req.files);              // console.log('------------------------');
+                        if (err) console.log('The API 2 returned an error: ' + err);
+                        // console.log(message.data.payload.headers);
+
+                        let data = {
+                            'id': message.data.id,
+                            'from': message.data.payload.headers.find(x => x.name === "From").value,
+                            'subject': message.data.payload.headers.find(x => x.name === "Subject").value.replace(/[^a-zA-Z0-9:']/g, " "),
+                            'date': new Date(Number(message.data.internalDate) / 1000)
+                        };
+
+                        result.push(data);
+
+                        if (result.length == messages.length) {
+                            // console.log('------------------------');
                             // console.log('result :');
                             // console.log(result);
                             res.render('index', {
@@ -151,7 +163,7 @@ app.get('/inbox', (req, res) => {
                                 client_id: process.env.CLIENT_ID,
                                 client_secret: process.env.CLIENT_SECRET
                             })
-                            // res.redirect('/inbox/' + nextToken)
+                            // res.redirect('/sent/' + nextToken)
                         }
                     })
                 });
